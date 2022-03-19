@@ -20,6 +20,7 @@ import FilterMenu from './Screen/FilterMenu';
 import Cart from "./Screen/Cart";
 import Male from './Screen/Male';
 import Female from './Screen/Female';
+import ProductDetails from './Screen/ProductDetails';
 
 
 import { Provider } from 'react-redux'
@@ -222,6 +223,23 @@ export default function App() {
                                 headerShown: enableHeader(route),
                             })}
               />
+              <Stack.Screen name={"ProductDetails"}
+                            // component={ProductDetails}
+                            options={({ route, navigation }) => ({
+                                headerTransparent: true,
+                                title: '',
+                                headerLeft: () => (
+                                    <TouchableOpacity
+                                        style = {{padding: 15}}
+                                        onPress={() => navigation.goBack()}
+                                        activeOpacity={1}>
+                                        <Image source={require('./assets/icon_chevron.png')} style={styles.icon_back}/>
+                                    </TouchableOpacity>
+                                ),
+                            })}
+              >
+                  {props => <ProductDetails {...props} scrollY={scrollY} />}
+              </Stack.Screen>
                 <Stack.Screen name={"Cart"}
                               component={Cart}
                               options={({ route, navigation }) => ({

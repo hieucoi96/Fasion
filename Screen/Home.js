@@ -46,21 +46,37 @@ const ItemVertical = ({ item, onPress, backgroundColor, textColor }) => (
 
 const Home = ({navigation}) => {
 
+    const [selectedId, setSelectedId] = useState(null);
+
+    function openProductDetails(item){
+        setSelectedId(item.id)
+        navigation.navigate("ProductDetails", {item: item})
+    }
+
     const renderItemHorizontal = ({ item }) => {
+        const backgroundColor = item.id === selectedId ? "#ffffff" : "#ffffff";
+        const color = item.id === selectedId ? 'black' : 'black';
 
         return (
             <ItemHorizontal
                 item={item}
+                onPress={() => openProductDetails(item)}
+                backgroundColor={{ backgroundColor }}
+                textColor={{ color }}
             />
         );
     };
 
     const renderItemVertical = ({ item }) => {
-
+        const backgroundColor = item.id === selectedId ? "#ffffff" : "#ffffff";
+        const color = item.id === selectedId ? 'black' : 'black';
 
         return (
             <ItemVertical
                 item={item}
+                onPress={() => setSelectedId(item.id)}
+                backgroundColor={{ backgroundColor }}
+                textColor={{ color }}
             />
         );
     };
@@ -73,6 +89,7 @@ const Home = ({navigation}) => {
                     data={data_vertical_list}
                     renderItem={renderItemVertical}
                     keyExtractor={(item) => item.id}
+                    extraData={selectedId}
                     showsVerticalScrollIndicator={false}
                     ListHeaderComponent={
                         <View style={{marginLeft: '4%', marginBottom:25,}}>
@@ -82,6 +99,7 @@ const Home = ({navigation}) => {
                                 data={data_horizontal_list}
                                 renderItem={renderItemHorizontal}
                                 keyExtractor={(item) => item.id}
+                                extraData={selectedId}
                                 showsHorizontalScrollIndicator={false}
                             />
                         </View>
@@ -158,4 +176,3 @@ const styles = StyleSheet.create({
 });
 
 export default Home;
-
