@@ -285,7 +285,6 @@ const styles = StyleSheet.create({
     },
     input:{
         flex: 1,
-        fontFamily: 'Open_Sans',
         fontStyle: 'normal',
         fontWeight: 'normal',
         fontSize: 16,

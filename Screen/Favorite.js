@@ -101,14 +101,12 @@ const styles = StyleSheet.create({
     },
     text_status: {
         marginTop: 7,
-        fontFamily: 'Open_Sans',
         fontStyle: 'normal',
         fontWeight: 'bold',
         fontSize: 10,
         lineHeight: 15,
     },
     text_name: {
-        fontFamily: 'Open_Sans',
         fontStyle: 'normal',
         fontWeight: 'normal',
         fontSize: 14,
@@ -116,7 +114,6 @@ const styles = StyleSheet.create({
     },
     text_old_price: {
         marginTop: 1,
-        fontFamily: 'Open_Sans',
         fontStyle: 'normal',
         fontWeight: 'normal',
         fontSize: 10,
@@ -124,7 +121,6 @@ const styles = StyleSheet.create({
         textDecorationLine: 'line-through',
     },
     text_price: {
-        fontFamily: 'Open_Sans',
         fontStyle: 'normal',
         fontWeight: 'normal',
         fontSize: 14,

@@ -167,7 +167,6 @@ const styles = StyleSheet.create({
         height: 186,
     },
     text_price: {
-        fontFamily: 'Open_Sans',
         fontStyle: 'normal',
         fontWeight: 'normal',
         fontSize: 14,
