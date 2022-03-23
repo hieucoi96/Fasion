@@ -67,6 +67,37 @@ const Personal = ({navigation}) => {
     );
 }
 
-//
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#ffffff',
+        padding: 15,
+    },
+    text_normal: {
+        fontStyle: 'normal',
+        fontWeight: 'normal',
+        fontSize: 14,
+        lineHeight: 21,
+    },
+    name: {
+        fontStyle: 'normal',
+        fontWeight: 'bold',
+        fontSize: 20,
+        lineHeight: 24,
+    },
+    icon_setting:{
+        backgroundColor: '#EFEFF0',
+        borderRadius: 50,
+        width: 26,
+        height: 26,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    item: {
+        alignItems: 'center',
+        borderColor: '#AEAEB2',
+        borderBottomWidth: 0.5,
+    }
+});
 
 export default Personal;
