@@ -1,31 +1,12 @@
-import React, {useState} from 'react';
-import { StyleSheet, Text, View, FlatList, Image, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import { StyleSheet, Text, View, FlatList, Image, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator } from 'react-native';
 import NumberFormat from "react-number-format";
+import axios from "axios";
 import {DATA_PRODUCT} from "../api/constants";
-
-const data_horizontal_list = DATA_PRODUCT
-
-const data_vertical_list = [
-    {
-        id: "111111",
-        name: "First Item",
-        src:require('../assets/img4.png')
-    },
-    {
-        id: "342432432",
-        name: "Second Item",
-        src:require('../assets/img5.png')
-    },
-    {
-        id: "8657644643",
-        name: "Third Item",
-        src:require('../assets/img4.png')
-    },
-];
 
 const ItemHorizontal = ({ item, onPress, backgroundColor, textColor }) => (
     <TouchableOpacity onPress={onPress} style={[styles.itemHorizontal, backgroundColor]} activeOpacity={1}>
-        <Image style={styles.imgHorizontal} source={item.src}/>
+        <Image style={styles.imgHorizontal} source={{ uri: item.src }} />
         <Text style={[styles.nameHorizontal, textColor]}>{item.name}</Text>
         <NumberFormat  value={item.price}
                        displayType={'text'}
@@ -39,23 +20,59 @@ const ItemHorizontal = ({ item, onPress, backgroundColor, textColor }) => (
 
 const ItemVertical = ({ item, onPress, backgroundColor, textColor }) => (
     <TouchableOpacity onPress={onPress} style={[styles.itemVertical, backgroundColor]} activeOpacity={1}>
-        <Image style={styles.imgVertical} source={item.src}/>
+        <Image style={styles.imgVertical} source={{ uri: item.src }} />
         <Text style={[styles.nameVertical, textColor]}>{item.name}</Text>
     </TouchableOpacity>
 );
 
-const Home = ({navigation}) => {
+var faketoken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjIzYzc4Y2RjOGFkOTAwMDIzZmU1NTg5IiwicGhvbmVfbnVtYmVyIjoiMDk2ODY0MTAwMSIsImlhdCI6MTY0ODEzMDMzNCwiZXhwIjoxNjQ4MjE2NzM0fQ.qaKaKqfWkOeb_WSJPFavsDSrNQoC4QiTmH7KOG697_k"
 
-    const [selectedId, setSelectedId] = useState(null);
+const Home = ({navigation, route}) => {
+    const { phone_number, token } = route.params ?? {};
+    const [horizontalList, setHorizontalList] = useState(null);
+    const [verticalList, setVerticalList] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+    const instance = axios.create({
+        baseURL: "https://hieuhmph12287-lab5.herokuapp.com/",
+        headers: { "x-access-token": faketoken },
+      });
+    
+      useEffect(() => {
+        setLoading(true);
+        const prod = () => {
+          return instance.get("/products/getProducts/newArrival");
+        };
+        const collection = () => {
+          return instance.get("/collections/getCollections");
+        };
+        Promise.all([prod(), collection()])
+          .then(function (results) {
+            setHorizontalList(results[0].data);
+            setVerticalList(results[1].data);
+          })
+          .catch(function (error) {
+            console.log(error);
+          })
+          .then(function () {
+            setLoading(false);
+          });
+      }, []);
 
     function openProductDetails(item){
-        setSelectedId(item.id)
-        navigation.navigate("ProductDetails", {item: item})
+        navigation.navigate("ProductDetails", { item: item });
     }
 
+    const openCollectionDetails = (collection_id) => {
+        navigation.navigate("Search", {
+          params: { collection_id, faketoken },
+          screen: "ListProduct",
+        });
+      };
+
     const renderItemHorizontal = ({ item }) => {
-        const backgroundColor = item.id === selectedId ? "#ffffff" : "#ffffff";
-        const color = item.id === selectedId ? 'black' : 'black';
+        const backgroundColor = "#ffffff";
+        const color = "black";
 
         return (
             <ItemHorizontal
@@ -68,13 +85,13 @@ const Home = ({navigation}) => {
     };
 
     const renderItemVertical = ({ item }) => {
-        const backgroundColor = item.id === selectedId ? "#ffffff" : "#ffffff";
-        const color = item.id === selectedId ? 'black' : 'black';
+        const backgroundColor = "#ffffff";
+        const color = "black";
 
         return (
             <ItemVertical
                 item={item}
-                onPress={() => setSelectedId(item.id)}
+                onPress={() => openCollectionDetails(item.collection_id)}
                 backgroundColor={{ backgroundColor }}
                 textColor={{ color }}
             />
@@ -83,29 +100,29 @@ const Home = ({navigation}) => {
 
     return (
         <SafeAreaView style={styles.container}>
-
-            <View style = {{ alignItems: 'center', justifyContent: 'center', flex: 1}}>
+        <View style={{ alignItems: "center", justifyContent: "center", flex: 1 }}>
+        {loading ? (
+          <ActivityIndicator size="large" color="#000000" />
+        ) : (
+          <FlatList
+            data={verticalList}
+            renderItem={renderItemVertical}
+            keyExtractor={(item) => item.product_id}
+            showsVerticalScrollIndicator={false}
+            ListHeaderComponent={
+              <View style={{ marginLeft: "4%", marginBottom: 25 }}>
+                <Text style={styles.title}>New Arrival</Text>
                 <FlatList
-                    data={data_vertical_list}
-                    renderItem={renderItemVertical}
-                    keyExtractor={(item) => item.id}
-                    extraData={selectedId}
-                    showsVerticalScrollIndicator={false}
-                    ListHeaderComponent={
-                        <View style={{marginLeft: '4%', marginBottom:25,}}>
-                            <Text style = {styles.title}>New Arrival</Text>
-                            <FlatList
-                                horizontal
-                                data={data_horizontal_list}
-                                renderItem={renderItemHorizontal}
-                                keyExtractor={(item) => item.id}
-                                extraData={selectedId}
-                                showsHorizontalScrollIndicator={false}
-                            />
-                        </View>
-                    }
+                  horizontal
+                  data={horizontalList}
+                  renderItem={renderItemHorizontal}
+                  keyExtractor={(item) => item.product_id}
+                  showsHorizontalScrollIndicator={false}
                 />
-            </View>
+              </View>
+            }/>
+        )}
+        </View>
         </SafeAreaView>
     );
 }
