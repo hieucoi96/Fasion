@@ -1,3 +1,4 @@
+
 import React, {useState} from 'react';
 import {StyleSheet, TextInput, TouchableOpacity, View, SafeAreaView,  Image, StatusBar, Animated } from 'react-native';
 import {NavigationContainer, getFocusedRouteNameFromRoute} from "@react-navigation/native";
@@ -27,17 +28,17 @@ import ListProduct from "./Screen/ListProduct";
 import FilterMenu from './Screen/FilterMenu';
 
 import MyOrder from "./Screen/MyOrder";
-import FAQS from "./Screen/FAQS";
-import Notification from "./Screen/Notification";
+// import FAQS from "./Screen/FAQS";
+// import Notification from "./Screen/Notification";
 import ChangeInfo from "./Screen/ChangeInfo";
 import SelectAddress from "./Screen/SelectAddress";
 import ProductDetails from "./Screen/ProductDetails";
 import Cart from "./Screen/Cart";
 import Delivery from "./Screen/Delivery";
 import AddAddress from "./Screen/AddAddress";
-import Payment from "./Screen/Payment";
-import OrderDetails from "./Screen/OrderDetails";
-import Review from "./Screen/Review";
+// import Payment from "./Screen/Payment";
+// import OrderDetails from "./Screen/OrderDetails";
+// import Review from "./Screen/Review";
 import SplashScreen from "./Screen/SplashScreen";
 
 import { Provider } from 'react-redux'
