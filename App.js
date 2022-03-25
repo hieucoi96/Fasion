@@ -11,17 +11,34 @@ import FlashMessage from "react-native-flash-message";
 import {LogBox } from 'react-native';
 LogBox.ignoreLogs(['Reanimated 2']);
 
+import Login from "./Screen/Login"
+import Register from "./Screen/Register";
+import ChangePassword from './Screen/ChangePassword';
+
 import Home from './Screen/Home';
 import Search from './Screen/Search';
 import Favorite from './Screen/Favorite';
 import Personal from './Screen/Personal';
-import ListProduct from "./Screen/ListProduct";
-import FilterMenu from './Screen/FilterMenu';
-import Cart from "./Screen/Cart";
+
 import Male from './Screen/Male';
 import Female from './Screen/Female';
-import ProductDetails from './Screen/ProductDetails';
 
+import ListProduct from "./Screen/ListProduct";
+import FilterMenu from './Screen/FilterMenu';
+
+import MyOrder from "./Screen/MyOrder";
+import FAQS from "./Screen/FAQS";
+import Notification from "./Screen/Notification";
+import ChangeInfo from "./Screen/ChangeInfo";
+import SelectAddress from "./Screen/SelectAddress";
+import ProductDetails from "./Screen/ProductDetails";
+import Cart from "./Screen/Cart";
+import Delivery from "./Screen/Delivery";
+import AddAddress from "./Screen/AddAddress";
+import Payment from "./Screen/Payment";
+import OrderDetails from "./Screen/OrderDetails";
+import Review from "./Screen/Review";
+import SplashScreen from "./Screen/SplashScreen";
 
 import { Provider } from 'react-redux'
 import store from './store/store'
@@ -54,6 +71,83 @@ function enableHeader(route) {
 
     return !(routeName === 'Search' || routeName === 'Personal');
 
+}
+
+function PersonalStack(){
+    return (
+        <Stack.Navigator
+            screenOptions={{
+                headerBackTitleVisible: false,
+                headerBackImage: () => <BackButton />,
+            }}>
+            <Stack.Screen name={"Personal"}
+                          component={Personal}
+                          options={({route, navigation }) => ({
+                              headerTitleAlign: 'center',
+                              headerLeft: () => null,
+                              headerRight: () => (
+                                  <ShoppingCartIcon/>
+                              ),
+                          })}
+            />
+            <Stack.Screen name={"Notification"}
+                          component={Notification}
+                          options={({route, navigation }) => ({
+                              headerTitleAlign: 'center',
+                              headerLeft: () => (
+                                  <TouchableOpacity
+                                      style = {{padding: 15}}
+                                      onPress={() => navigation.goBack()}
+                                      activeOpacity={1}>
+                                      <Image source={require('./assets/icon_chevron.png')} style={styles.icon_back}/>
+                                  </TouchableOpacity>
+                              ),
+                          })}
+            />
+            <Stack.Screen name={"MyOrder"}
+                          component={MyOrder}
+                          options={({route, navigation }) => ({
+                              headerTitleAlign: 'center',
+                              headerLeft: () => (
+                                  <TouchableOpacity
+                                      style = {{padding: 15}}
+                                      onPress={() => navigation.goBack()}
+                                      activeOpacity={1}>
+                                      <Image source={require('./assets/icon_chevron.png')} style={styles.icon_back}/>
+                                  </TouchableOpacity>
+                              ),
+                          })}
+            />
+            <Stack.Screen name={"FAQS"}
+                          component={FAQS}
+                          options={({route, navigation }) => ({
+                              headerTitleAlign: 'center',
+                              headerLeft: () => (
+                                  <TouchableOpacity
+                                      style = {{padding: 15}}
+                                      onPress={() => navigation.goBack()}
+                                      activeOpacity={1}>
+                                      <Image source={require('./assets/icon_chevron.png')} style={styles.icon_back}/>
+                                  </TouchableOpacity>
+                              ),
+                          })}
+            />
+            <Stack.Screen name={"ChangeInfo"}
+                          component={ChangeInfo}
+                          options={({route, navigation }) => ({
+                              headerTitleAlign: 'center',
+                              headerLeft: () => (
+                                  <TouchableOpacity
+                                      style = {{padding: 15}}
+                                      onPress={() => navigation.goBack()}
+                                      activeOpacity={1}>
+                                      <Image source={require('./assets/icon_chevron.png')} style={styles.icon_back}/>
+                                  </TouchableOpacity>
+                              ),
+                          })}
+            />
+        </Stack.Navigator>
+    )
 }
 
 function GenderStack() {
@@ -181,7 +275,7 @@ function MainStack(){
                 />
                 <TabHome.Screen
                     name="Personal"
-                    component={Personal}
+                    component={PersonalStack}
                     options={{
                         tabBarIcon: ({ color, size }) => (
                             <MaterialCommunityIcons
@@ -208,7 +302,30 @@ export default function App() {
                     headerBackImage: () => <BackButton />,
                 }}
             >
-
+                <Stack.Screen name={"SplashScreen"}
+                              component={SplashScreen}
+                              options={{
+                                  headerShown: false,
+                              }}
+                />
+              <Stack.Screen name={"Login"}
+                            component={Login}
+                            options={{
+                              headerShown: false,
+                            }}
+              />
+              <Stack.Screen name={"Register"}
+                            component={Register}
+                            options={{
+                              headerShown: false,
+                            }}
+              />
+              <Stack.Screen name={"ChangePassword"}
+                            component={ChangePassword}
+                            options={{
+                                headerShown: false,
+                            }}
+              />
               <Stack.Screen name={"MainStack"}
                             component={MainStack}
 
@@ -221,6 +338,21 @@ export default function App() {
                                     <ShoppingCartIcon/>
                                 ),
                                 headerShown: enableHeader(route),
+                            })}
+              />
+              <Stack.Screen name={"SelectAddress"}
+                            component={SelectAddress}
+                            options={({ route, navigation }) => ({
+                                headerTitleAlign: 'center',
+                                title: route.params.name,
+                                headerLeft: () => (
+                                    <TouchableOpacity
+                                        style = {{padding: 15}}
+                                        onPress={() => navigation.goBack()}
+                                        activeOpacity={1}>
+                                        <Image source={require('./assets/icon_chevron.png')} style={styles.icon_back}/>
+                                    </TouchableOpacity>
+                                ),
                             })}
               />
               <Stack.Screen name={"ProductDetails"}
@@ -245,6 +377,81 @@ export default function App() {
                               options={({ route, navigation }) => ({
                                   headerTitleAlign: 'center',
                                   title: 'Cart',
+                                  headerLeft: () => (
+                                      <TouchableOpacity
+                                          style = {{padding: 15}}
+                                          onPress={() => navigation.goBack()}
+                                          activeOpacity={1}>
+                                          <Image source={require('./assets/icon_chevron.png')} style={styles.icon_back}/>
+                                      </TouchableOpacity>
+                                  ),
+                              })}
+                />
+                <Stack.Screen name={"Delivery"}
+                              component={Delivery}
+                              options={({ route, navigation }) => ({
+                                  headerTitleAlign: 'center',
+                                  title: 'Delivery',
+                                  headerLeft: () => (
+                                      <TouchableOpacity
+                                          style = {{padding: 15}}
+                                          onPress={() => navigation.goBack()}
+                                          activeOpacity={1}>
+                                          <Image source={require('./assets/icon_chevron.png')} style={styles.icon_back}/>
+                                      </TouchableOpacity>
+                                  ),
+                              })}
+                />
+                <Stack.Screen name={"AddAddress"}
+                              component={AddAddress}
+                              options={({ route, navigation }) => ({
+                                  headerTitleAlign: 'center',
+                                  title: 'Add Delivery Address',
+                                  headerLeft: () => (
+                                      <TouchableOpacity
+                                          style = {{padding: 15}}
+                                          onPress={() => navigation.goBack()}
+                                          activeOpacity={1}>
+                                          <Image source={require('./assets/icon_chevron.png')} style={styles.icon_back}/>
+                                      </TouchableOpacity>
+                                  ),
+                              })}
+                />
+                <Stack.Screen name={"Payment"}
+                              component={Payment}
+                              options={({ route, navigation }) => ({
+                                  headerTitleAlign: 'center',
+                                  title: 'Payment',
+                                  headerLeft: () => (
+                                      <TouchableOpacity
+                                          style = {{padding: 15}}
+                                          onPress={() => navigation.goBack()}
+                                          activeOpacity={1}>
+                                          <Image source={require('./assets/icon_chevron.png')} style={styles.icon_back}/>
+                                      </TouchableOpacity>
+                                  ),
+                              })}
+                />
+                <Stack.Screen name={"OrderDetails"}
+                              component={OrderDetails}
+                              options={({ route, navigation }) => ({
+                                  headerTitleAlign: 'center',
+                                  title: 'OrderDetails',
+                                  headerLeft: () => (
+                                      <TouchableOpacity
+                                          style = {{padding: 15}}
+                                          onPress={() => navigation.goBack()}
+                                          activeOpacity={1}>
+                                          <Image source={require('./assets/icon_chevron.png')} style={styles.icon_back}/>
+                                      </TouchableOpacity>
+                                  ),
+                              })}
+                />
+                <Stack.Screen name={"Review"}
+                              component={Review}
+                              options={({ route, navigation }) => ({
+                                  headerTitleAlign: 'center',
+                                  title: 'Review',
                                   headerLeft: () => (
                                       <TouchableOpacity
                                           style = {{padding: 15}}
@@ -285,6 +492,7 @@ const styles = StyleSheet.create({
     },
     input:{
         flex: 1,
+        fontFamily: 'Open_Sans',
         fontStyle: 'normal',
         fontWeight: 'normal',
         fontSize: 16,
