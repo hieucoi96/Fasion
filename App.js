@@ -1,3 +1,4 @@
+
 import React, {useState} from 'react';
 import {StyleSheet, TextInput, TouchableOpacity, View, SafeAreaView,  Image, StatusBar, Animated } from 'react-native';
 import {NavigationContainer, getFocusedRouteNameFromRoute} from "@react-navigation/native";
