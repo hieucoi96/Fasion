@@ -55,7 +55,7 @@ const ChangeInfo = ({route, navigation}) => {
         if(city === ''){
             showMessage({
                 message: "Lỗi!",
-                description: "Vui lòng chọn Tỉnh / Thành Phố",
+                description: "Vui lòng chọn Tỉnh/Thành Phố",
                 type: "warning",
                 icon: { icon: "auto", position: "left" },
                 backgroundColor: '#f2ac50',
@@ -69,7 +69,7 @@ const ChangeInfo = ({route, navigation}) => {
         if(district === ''){
             showMessage({
                 message: "Lỗi!",
-                description: "Vui lòng chọn Quận / Huyện",
+                description: "Vui lòng chọn Quận/Huyện",
                 type: "warning",
                 icon: { icon: "auto", position: "left" },
                 backgroundColor: '#f2ac50',
