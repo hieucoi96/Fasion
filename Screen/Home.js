@@ -25,7 +25,7 @@ const ItemVertical = ({ item, onPress, backgroundColor, textColor }) => (
     </TouchableOpacity>
 );
 
-var faketoken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjIzYzc4Y2RjOGFkOTAwMDIzZmU1NTg5IiwicGhvbmVfbnVtYmVyIjoiMDk2ODY0MTAwMSIsImlhdCI6MTY0ODEzMDMzNCwiZXhwIjoxNjQ4MjE2NzM0fQ.qaKaKqfWkOeb_WSJPFavsDSrNQoC4QiTmH7KOG697_k"
+var faketoken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjIzYzc4Y2RjOGFkOTAwMDIzZmU1NTg5IiwicGhvbmVfbnVtYmVyIjoiMDk2ODY0MTAwMSIsImlhdCI6MTY0ODIyMzEyNCwiZXhwIjoxNjQ4MzA5NTI0fQ.c549ZvUTGMtpwKv5SKEBUNqG2UkFTXsnHGfEcTwMgps"
 
 const Home = ({navigation, route}) => {
     const { phone_number, token } = route.params ?? {};
