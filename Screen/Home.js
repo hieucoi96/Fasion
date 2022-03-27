@@ -26,8 +26,6 @@ const ItemVertical = ({ item, onPress, backgroundColor, textColor }) => (
     </TouchableOpacity>
 );
 
-var faketoken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjIzYzc4Y2RjOGFkOTAwMDIzZmU1NTg5IiwicGhvbmVfbnVtYmVyIjoiMDk2ODY0MTAwMSIsImlhdCI6MTY0ODIyMzEyNCwiZXhwIjoxNjQ4MzA5NTI0fQ.c549ZvUTGMtpwKv5SKEBUNqG2UkFTXsnHGfEcTwMgps"
-
 const Home = ({navigation, route}) => {
     const { phone_number, token } = route.params ?? {};
     const [horizontalList, setHorizontalList] = useState(null);
@@ -36,7 +34,7 @@ const Home = ({navigation, route}) => {
 
     const instance = axios.create({
         baseURL: "https://hieuhmph12287-lab5.herokuapp.com/",
-        headers: { "x-access-token": faketoken },
+        headers: { "x-access-token": token },
       });
     
       useEffect(() => {
@@ -66,7 +64,7 @@ const Home = ({navigation, route}) => {
 
     const openCollectionDetails = (collection_id) => {
         navigation.navigate("Search", {
-          params: { collection_id, faketoken },
+          params: { collection_id, token },
           screen: "ListProduct",
         });
       };

@@ -9,16 +9,14 @@ import { DATA_PRODUCT } from "../api/constants";
 const heartOutline = require("../assets/icon_heart_outline.png");
 const heartFull = require("../assets/icon_heart_full.png");
 
-var faketoken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjIzYzc4Y2RjOGFkOTAwMDIzZmU1NTg5IiwicGhvbmVfbnVtYmVyIjoiMDk2ODY0MTAwMSIsImlhdCI6MTY0ODIyMzEyNCwiZXhwIjoxNjQ4MzA5NTI0fQ.c549ZvUTGMtpwKv5SKEBUNqG2UkFTXsnHGfEcTwMgps"
-
 const ListProduct = ({ route, navigation }) => {
-  const { collection_id, faketoken } = route.params ?? {};
+  const { collection_id, token } = route.params ?? {};
   const [loading, setLoading] = useState(false);
   const [listProduct, setListProduct] = useState(null);
 
   const instance = axios.create({
     baseURL: "https://hieuhmph12287-lab5.herokuapp.com/",
-    headers: { "x-access-token": faketoken },
+    headers: { "x-access-token": token },
   });
 
   useEffect(() => {

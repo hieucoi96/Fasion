@@ -6,8 +6,8 @@ import LottieView from "lottie-react-native";
 import axios from "axios";
 
 const Login = ({ navigation }) => {
-  const [phone_number, setPhone] = useState("0977052703");
-  const [password, setPassword] = useState("1");
+  const [phone_number, setPhone] = useState("0968641001");
+  const [password, setPassword] = useState("ductest123");
   const [loading, setLoading] = useState(false);
 
   const instance = axios.create({
