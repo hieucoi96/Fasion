@@ -1,3 +1,4 @@
+
 import React, {useEffect, useState} from 'react';
 import {StyleSheet, Text, View, FlatList, ImageBackground, Image, TouchableOpacity, SafeAreaView,} from 'react-native';
 import NumberFormat from 'react-number-format';
