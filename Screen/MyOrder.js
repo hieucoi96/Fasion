@@ -177,6 +177,17 @@ const ListProduct = ({ route, navigation }) => {
     }
   }, [collection_id]);
 
+  let data = DATA_PRODUCT;
+
+  const [selectedView, setSelectedView] = useState("grid");
+
+  function selectView() {
+    if (selectedView === "grid") {
+      setSelectedView("list");
+    } else {
+      setSelectedView("grid");
+    }
+  }
 const bill_data = DATA_BILL
 const MyOrder = ({navigation}) => {
 
