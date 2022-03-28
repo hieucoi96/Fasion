@@ -4,145 +4,179 @@ import NumberFormat from "react-number-format";
 import { AntDesign } from '@expo/vector-icons';
 import {DATA_BILL} from "../api/constants";
 
- const bill_data=[
-     {
-         bill_code: 'FASN1234',
-         datetime: '13:08  27-09-2020',
-         name: 'Hieu Hoang',
-         phone_number: '0987654321',
-         address: '96 ngõ 204 Trần Duy Hưng, Cầu Giấy, Hà Nội',
-         sale_value: 90000,
-         delivery_value: 40000,
-         final_value: 3550000,
-         total_value: 3600000,
-         item:[
-             {
-                 id: "bd7acbea-c1b1-46c2-aed5-3ad53abb28ba",
-                 name: "Áo khoác A",
-                 src:require('../assets/img_coat_3.jpg'),
-                 status: "New Arrival",
-                 old_price: 1200000,
-                 price: 990000,
-                 color: 'Xám trắng',
-                 size: 'XL',
-                 quantity: 1,
-             },
-             {
-                 id: "3ac68afc-c605-48d3-a4f8-fbd91aa97f63",
-                 name: "Áo khoác B",
-                 src:require('../assets/img_coat_4.jpg'),
-                 status: "Super Sale",
-                 old_price: 2400000,
-                 price: 1499000,
-                 color: 'Đen',
-                 size: 'XL',
-                 quantity: 1,
-             },
-         ],
-         total_product: 2,
-         status: 'Đang xử lý',
-     },
-     {
-         bill_code: 'FASN3345',
-         datetime: '13:08  27-09-2021',
-         name: 'Hieu Hoang',
-         phone_number: '0987654321',
-         address: '96 ngõ 204 Trần Duy Hưng, Cầu Giấy, Hà Nội',
-         sale_value: 140000,
-         delivery_value: 40000,
-         final_value: 5370000,
-         total_value: 5470000,
-         item:[
-             {
-                 id: "bd7acbea-c1b1-46c2-aed5-3ad53abb28ba",
-                 name: "Áo khoác A",
-                 src:require('../assets/img_coat_3.jpg'),
-                 status: "New Arrival",
-                 old_price: 1200000,
-                 price: 990000,
-                 color: 'Xám trắng',
-                 size: 'XL',
-                 quantity: 1,
-             },
-             {
-                 id: "3ac68afc-c605-48d3-a4f8-fbd91aa97f63",
-                 name: "Áo khoác B",
-                 src:require('../assets/img_coat_4.jpg'),
-                 status: "Super Sale",
-                 old_price: 2400000,
-                 price: 1499000,
-                 color: 'Đen',
-                 size: 'XL',
-                 quantity: 1,
-             },
-             {
-                 id: "45345a0f-3da1-471f-bd96-145571e29d72",
-                 name: "Áo khoác D",
-                 src:require('../assets/img_fav_1.png'),
-                 status: "New Arrival",
-                 old_price: 3400000,
-                 price: 2990000,
-                 color: 'Xanh dương',
-                 size: 'M',
-                 quantity: 1,
-             },
-         ],
-         total_product: 3,
-         status: 'Đang vận chuyển',
-     },
-     {
-         bill_code: 'FASN8986',
-         datetime: '13:08  30-09-2020',
-         name: 'Hieu Hoang',
-         phone_number: '0987654321',
-         address: '96 ngõ 204 Trần Duy Hưng, Cầu Giấy, Hà Nội',
-         sale_value: 45000,
-         delivery_value: 40000,
-         final_value: 985000,
-         total_value: 990000,
-         item:[
-             {
-                 id: "bd7acbea-c1b1-46c2-aed5-3ad53abb28ba",
-                 name: "Áo khoác A",
-                 src:require('../assets/img_coat_3.jpg'),
-                 status: "New Arrival",
-                 old_price: 1200000,
-                 price: 990000,
-                 color: 'Xám trắng',
-                 size: 'XL',
-                 quantity: 1,
-             },
-         ],
-         total_product: 1,
-         status: 'Đã hủy',
-     },
-     {
-         bill_code: 'FASN3555',
-         datetime: '13:08  27-11-2020',
-         name: 'Hieu Hoang',
-         phone_number: '0987654321',
-         address: '96 ngõ 204 Trần Duy Hưng, Cầu Giấy, Hà Nội',
-         sale_value: 0,
-         delivery_value: 40000,
-         total_value: 990000,
-         final_value: 1030000,
-         item:[
-             {
-                 id: "bd7acbea-c1b1-46c2-aed5-3ad53abb28ba",
-                 name: "Áo khoác A",
-                 src:require('../assets/img_coat_3.jpg'),
-                 status: "New Arrival",
-                 old_price: 1200000,
-                 price: 990000,
-                 color: 'Xám trắng',
-                 size: 'XL',
-                 quantity: 1,
-             },
-         ],
-         total_product: 1,
-         status: 'Đã hoàn thành',
-     },
- ]
+// const bill_data=[
+//     {
+//         bill_code: 'FASN1234',
+//         datetime: '13:08  27-09-2020',
+//         name: 'Hieu Hoang',
+//         phone_number: '0987654321',
+//         address: '96 ngõ 204 Trần Duy Hưng, Cầu Giấy, Hà Nội',
+//         sale_value: 90000,
+//         delivery_value: 40000,
+//         final_value: 3550000,
+//         total_value: 3600000,
+//         item:[
+//             {
+//                 id: "bd7acbea-c1b1-46c2-aed5-3ad53abb28ba",
+//                 name: "Áo khoác A",
+//                 src:require('../assets/img_coat_3.jpg'),
+//                 status: "New Arrival",
+//                 old_price: 1200000,
+//                 price: 990000,
+//                 color: 'Xám trắng',
+//                 size: 'XL',
+//                 quantity: 1,
+//             },
+//             {
+//                 id: "3ac68afc-c605-48d3-a4f8-fbd91aa97f63",
+//                 name: "Áo khoác B",
+//                 src:require('../assets/img_coat_4.jpg'),
+//                 status: "Super Sale",
+//                 old_price: 2400000,
+//                 price: 1499000,
+//                 color: 'Đen',
+//                 size: 'XL',
+//                 quantity: 1,
+//             },
+//         ],
+//         total_product: 2,
+//         status: 'Đang xử lý',
+//     },
+//     {
+//         bill_code: 'FASN3345',
+//         datetime: '13:08  27-09-2021',
+//         name: 'Hieu Hoang',
+//         phone_number: '0987654321',
+//         address: '96 ngõ 204 Trần Duy Hưng, Cầu Giấy, Hà Nội',
+//         sale_value: 140000,
+//         delivery_value: 40000,
+//         final_value: 5370000,
+//         total_value: 5470000,
+//         item:[
+//             {
+//                 id: "bd7acbea-c1b1-46c2-aed5-3ad53abb28ba",
+//                 name: "Áo khoác A",
+//                 src:require('../assets/img_coat_3.jpg'),
+//                 status: "New Arrival",
+//                 old_price: 1200000,
+//                 price: 990000,
+//                 color: 'Xám trắng',
+//                 size: 'XL',
+//                 quantity: 1,
+//             },
+//             {
+//                 id: "3ac68afc-c605-48d3-a4f8-fbd91aa97f63",
+//                 name: "Áo khoác B",
+//                 src:require('../assets/img_coat_4.jpg'),
+//                 status: "Super Sale",
+//                 old_price: 2400000,
+//                 price: 1499000,
+//                 color: 'Đen',
+//                 size: 'XL',
+//                 quantity: 1,
+//             },
+//             {
+//                 id: "45345a0f-3da1-471f-bd96-145571e29d72",
+//                 name: "Áo khoác D",
+//                 src:require('../assets/img_fav_1.png'),
+//                 status: "New Arrival",
+//                 old_price: 3400000,
+//                 price: 2990000,
+//                 color: 'Xanh dương',
+//                 size: 'M',
+//                 quantity: 1,
+//             },
+//         ],
+//         total_product: 3,
+//         status: 'Đang vận chuyển',
+//     },
+//     {
+//         bill_code: 'FASN8986',
+//         datetime: '13:08  30-09-2020',
+//         name: 'Hieu Hoang',
+//         phone_number: '0987654321',
+//         address: '96 ngõ 204 Trần Duy Hưng, Cầu Giấy, Hà Nội',
+//         sale_value: 45000,
+//         delivery_value: 40000,
+//         final_value: 985000,
+//         total_value: 990000,
+//         item:[
+//             {
+//                 id: "bd7acbea-c1b1-46c2-aed5-3ad53abb28ba",
+//                 name: "Áo khoác A",
+//                 src:require('../assets/img_coat_3.jpg'),
+//                 status: "New Arrival",
+//                 old_price: 1200000,
+//                 price: 990000,
+//                 color: 'Xám trắng',
+//                 size: 'XL',
+//                 quantity: 1,
+//             },
+//         ],
+//         total_product: 1,
+//         status: 'Đã hủy',
+//     },
+//     {
+//         bill_code: 'FASN3555',
+//         datetime: '13:08  27-11-2020',
+//         name: 'Hieu Hoang',
+//         phone_number: '0987654321',
+//         address: '96 ngõ 204 Trần Duy Hưng, Cầu Giấy, Hà Nội',
+//         sale_value: 0,
+//         delivery_value: 40000,
+//         total_value: 990000,
+//         final_value: 1030000,
+//         item:[
+//             {
+//                 id: "bd7acbea-c1b1-46c2-aed5-3ad53abb28ba",
+//                 name: "Áo khoác A",
+//                 src:require('../assets/img_coat_3.jpg'),
+//                 status: "New Arrival",
+//                 old_price: 1200000,
+//                 price: 990000,
+//                 color: 'Xám trắng',
+//                 size: 'XL',
+//                 quantity: 1,
+//             },
+//         ],
+//         total_product: 1,
+//         status: 'Đã hoàn thành',
+//     },
+// ]
+const ListProduct = ({ route, navigation }) => {
+  const { collection_id, token } = route.params ?? {};
+  const [loading, setLoading] = useState(false);
+  const [listProduct, setListProduct] = useState(null);
+
+  const instance = axios.create({
+    baseURL: "https://hieuhmph12287-lab5.herokuapp.com/",
+    headers: { "x-access-token": token },
+  });
+
+  useEffect(() => {
+    if (collection_id) {
+      setLoading(true);
+      instance
+        .get("products/getProducts/" + collection_id)
+        .then(function (response) {
+          setListProduct(response.data);
+          //   Alert.alert("Thông báo", "Đổi mật khẩu thành công!", [
+          //     { text: "OK", onPress: () => navigation.navigate("Login") },
+          //   ]);
+        })
+        .catch(function (error) {
+          //   Alert.alert(
+          //     "Thông báo",
+          //     "Đổi mật khẩu không thành công: " + error.message
+          //   );
+          console.log(error);
+        })
+        .then(function () {
+          setLoading(false);
+        });
+    }
+  }, [collection_id]);
+
 const bill_data = DATA_BILL
 const MyOrder = ({navigation}) => {
 
