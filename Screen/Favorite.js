@@ -75,8 +75,6 @@ const Item = ({ item, addOrRemoveFav, favorite, onPress }) => {
 
 const Favorite = ({ navigation }) => {
   const dispatch = useDispatch();
-  // const data = useSelector(state => state.favReducer.data)
-  // const temp = [...data]
   const isFocused = useIsFocused();
   const [listProduct, setListProduct] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -93,15 +91,8 @@ const Favorite = ({ navigation }) => {
       .post("products/getFavoriteProducts", { product_ids: fav_product_list })
       .then(function (response) {
         setListProduct(response.data);
-        //   Alert.alert("Thông báo", "Đổi mật khẩu thành công!", [
-        //     { text: "OK", onPress: () => navigation.navigate("Login") },
-        //   ]);
       })
       .catch(function (error) {
-        //   Alert.alert(
-        //     "Thông báo",
-        //     "Đổi mật khẩu không thành công: " + error.message
-        //   );
         console.log(error);
       })
       .then(function () {
@@ -118,7 +109,6 @@ const Favorite = ({ navigation }) => {
             .get("/users/addFavorite/" + item.product_id)
             .then(function (response) { })
             .catch(function (error) {
-              // Alert.alert("Thông báo", "Đăng nhập không thành công!");
               console.log(error);
             });
 
