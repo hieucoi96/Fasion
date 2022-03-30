@@ -143,6 +143,51 @@ import {DATA_BILL} from "../api/constants";
 //         status: 'Đã hoàn thành',
 //     },
 // ]
+const ListProduct = ({ route, navigation }) => {
+  const { collection_id, token } = route.params ?? {};
+  const [loading, setLoading] = useState(false);
+  const [listProduct, setListProduct] = useState(null);
+
+  const instance = axios.create({
+    baseURL: "https://hieuhmph12287-lab5.herokuapp.com/",
+    headers: { "x-access-token": token },
+  });
+
+  useEffect(() => {
+    if (collection_id) {
+      setLoading(true);
+      instance
+        .get("products/getProducts/" + collection_id)
+        .then(function (response) {
+          setListProduct(response.data);
+          //   Alert.alert("Thông báo", "Đổi mật khẩu thành công!", [
+          //     { text: "OK", onPress: () => navigation.navigate("Login") },
+          //   ]);
+        })
+        .catch(function (error) {
+          //   Alert.alert(
+          //     "Thông báo",
+          //     "Đổi mật khẩu không thành công: " + error.message
+          //   );
+          console.log(error);
+        })
+        .then(function () {
+          setLoading(false);
+        });
+    }
+  }, [collection_id]);
+
+  let data = DATA_PRODUCT;
+
+  const [selectedView, setSelectedView] = useState("grid");
+
+  function selectView() {
+    if (selectedView === "grid") {
+      setSelectedView("list");
+    } else {
+      setSelectedView("grid");
+    }
+  }
 const bill_data = DATA_BILL
 const MyOrder = ({navigation}) => {
 
