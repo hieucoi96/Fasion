@@ -110,25 +110,6 @@ const Login = ({ navigation }) => {
           <Text style={styles.text_register_text}>Đăng ký</Text>
         </TouchableOpacity>
       </View>
-
-      {/* <View style={styles.button_container}>
-        <Ripple style={styles.button_login_google}>
-          
-          <Image
-            style={{ width: 23, height: 23, marginRight: 5 }}
-            source={require("../assets/icon_google.png")}
-          />
-          <Text> Google</Text>
-        </Ripple>
-        <Ripple style={styles.button_login_facebook}>
-          
-          <Image
-            style={{ width: 23, height: 23, marginRight: 5 }}
-            source={require("../assets/icon_facebook.png")}
-          />
-          <Text> Facebook</Text>
-        </Ripple>
-      </View> */}
     </View>
   );
 };

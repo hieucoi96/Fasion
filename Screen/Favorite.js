@@ -1,16 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useIsFocused } from "@react-navigation/native";
-import {
-  StyleSheet,
-  Text,
-  View,
-  FlatList,
-  ImageBackground,
-  Image,
-  TouchableOpacity,
-  SafeAreaView,
-  ActivityIndicator,
-} from "react-native";
+import {StyleSheet, Text, View, FlatList, ImageBackground, Image, TouchableOpacity, SafeAreaView, ActivityIndicator,} from "react-native";
 import NumberFormat from "react-number-format";
 import { useDispatch, useSelector } from "react-redux";
 import { changeFav } from "../store/itemAction";
