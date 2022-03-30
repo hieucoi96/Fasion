@@ -1,11 +1,13 @@
-import React, { useState, useRef } from "react";
-import {StyleSheet, Text, View, TouchableOpacity, TextInput, Image, Alert,ActivityIndicator,} from "react-native";
+import React, { useState } from "react";
+import {StyleSheet, Text, View, TouchableOpacity, TextInput, Alert, ActivityIndicator,} from "react-native";
 import { useFonts } from "expo-font";
 import Ripple from "react-native-material-ripple";
-import LottieView from "lottie-react-native";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { addUserInfo } from "../store/itemAction";
 
 const Login = ({ navigation }) => {
+  const dispatch = useDispatch();
   const [phone_number, setPhone] = useState("0977052703");
   const [password, setPassword] = useState("1");
   const [loading, setLoading] = useState(false);
@@ -35,6 +37,7 @@ const Login = ({ navigation }) => {
         const token = response.data.token;
         console.log("Res:", response.data);
         setLoading(false);
+        dispatch(addUserInfo(response.data));
         navigation.navigate("MainStack", {
           params: { phone_number, token },
           screen: "Home",
@@ -58,6 +61,7 @@ const Login = ({ navigation }) => {
             style={styles.input}
             onChangeText={(phone) => setPhone(phone)}
             value={phone_number}
+            keyboardType={"phone-pad"}
             editable={!loading}
             placeholder="Số điện thoại"
             placeholderTextColor="#636366"
@@ -76,6 +80,7 @@ const Login = ({ navigation }) => {
           />
         </View>
         <TouchableOpacity
+          disabled={loading}
           onPress={() => {
             navigation.navigate("ChangePassword");
           }}
@@ -86,6 +91,7 @@ const Login = ({ navigation }) => {
 
       <Ripple
         style={styles.button_login}
+        disabled={loading}
         onPress={() => {
           userLogin();
         }}
@@ -103,6 +109,7 @@ const Login = ({ navigation }) => {
       <View style={styles.text_question}>
         <Text>Bạn chưa có tài khoản? </Text>
         <TouchableOpacity
+          disabled={loading}
           onPress={() => {
             navigation.navigate("Register");
           }}
@@ -110,8 +117,7 @@ const Login = ({ navigation }) => {
           <Text style={styles.text_register_text}>Đăng ký</Text>
         </TouchableOpacity>
       </View>
-
-      {/* <View style={styles.button_container}>
+          {/* <View style={styles.button_container}>
         <Ripple style={styles.button_login_google}>
           
           <Image
