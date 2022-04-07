@@ -1,16 +1,20 @@
 import React, { useState } from "react";
-import {StyleSheet, Text, View, TouchableOpacity, TextInput, Alert, ActivityIndicator,} from "react-native";
+import {StyleSheet, Text, View, TouchableOpacity, TextInput, Alert, ActivityIndicator, } from "react-native";
 import { useFonts } from "expo-font";
 import Ripple from "react-native-material-ripple";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { addUserInfo } from "../store/itemAction";
 
-const Login = ({ navigation }) => {
+const Login = ({ navigation, notifyToken }) => {
   const dispatch = useDispatch();
   const [phone_number, setPhone] = useState("0977052703");
   const [password, setPassword] = useState("1");
   const [loading, setLoading] = useState(false);
+
+  if (!notifyToken) {
+    console.log("Can't get notifyToken: ", notifyToken);
+  }
 
   const instance = axios.create({
     baseURL: "https://hieuhmph12287-lab5.herokuapp.com/",
@@ -32,6 +36,7 @@ const Login = ({ navigation }) => {
       .post("/users/loginUser", {
         phone_number,
         password,
+        notifyToken,
       })
       .then(function (response) {
         const token = response.data.token;
@@ -53,7 +58,7 @@ const Login = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.brand}>fasions.</Text>
-      <Text style={styles.title}>Đăng nhập với email của bạn</Text>
+      <Text style={styles.title}>Đăng nhập với số điện thoại của bạn</Text>
 
       <View style={styles.input_container}>
         <View style={styles.inputSection}>
@@ -117,24 +122,6 @@ const Login = ({ navigation }) => {
           <Text style={styles.text_register_text}>Đăng ký</Text>
         </TouchableOpacity>
       </View>
-          {/* <View style={styles.button_container}>
-        <Ripple style={styles.button_login_google}>
-          
-          <Image
-            style={{ width: 23, height: 23, marginRight: 5 }}
-            source={require("../assets/icon_google.png")}
-          />
-          <Text> Google</Text>
-        </Ripple>
-        <Ripple style={styles.button_login_facebook}>
-          
-          <Image
-            style={{ width: 23, height: 23, marginRight: 5 }}
-            source={require("../assets/icon_facebook.png")}
-          />
-          <Text> Facebook</Text>
-        </Ripple>
-      </View> */}
     </View>
   );
 };
