@@ -31,27 +31,6 @@ const ChangePassword = ({ navigation }) => {
     baseURL: "https://hieuhmph12287-lab5.herokuapp.com/",
     timeout: 1000,
   });
-  // console.log("render");
-  // const RenderInput = () => {
-  //   switch (stage) {
-  //     case 1:
-  //       return (
-  //         <View style={styles.input_container}>
-  //           <View style={styles.inputSection}>
-  //             <TextInput
-  //               style={styles.input}
-  //               onChangeText={(phone) => setPhone(phone)}
-  //               autoFocus
-  //               autoCompleteType="tel"
-  //               keyboardType="phone-pad"
-  //               textContentType="telephoneNumber"
-  //               value={phone_number}
-  //               placeholder="Số điện thoại"
-  //               placeholderTextColor="#636366"
-  //             />
-  //           </View>
-  //         </View>
-  //       );
 
   const confirmClicked = async () => {
     if (stage === 1) {
@@ -187,7 +166,6 @@ const ChangePassword = ({ navigation }) => {
       <FirebaseRecaptchaVerifierModal
         ref={recaptchaVerifier}
         firebaseConfig={app.options}
-        // attemptInvisibleVerification={true}
       />
     </View>
   );
