@@ -1,5 +1,13 @@
 import React from "react";
-import {StyleSheet, Text, View, FlatList, ImageBackground, TouchableOpacity,SafeAreaView,} from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  ImageBackground,
+  TouchableOpacity,
+  SafeAreaView,
+} from "react-native";
 
 const data = [
   {
@@ -53,6 +61,10 @@ const Item = ({ item, onPress, navigation, textColor }) => (
         prevScreen: "Gender",
         type: item.name,
         gender: "Female",
+        collection_id: null,
+        low: null,
+        high: null,
+        size: null,
       })
     }
     activeOpacity={1}
