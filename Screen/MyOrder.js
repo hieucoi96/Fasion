@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   TextInput,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import NumberFormat from "react-number-format";
 import { AntDesign } from "@expo/vector-icons";
@@ -31,11 +32,11 @@ const MyOrder = ({ navigation }) => {
     instance
       .get("/bills/getBillsByUser")
       .then(function (response) {
-        console.log("Res:", response.data);
         setBillData(response.data);
       })
       .catch(function (error) {
         console.log(error);
+        Alert.alert("Thông báo", "Có lỗi xảy ra: " + error.message);
       })
       .then(function () {
         setLoading(false);
