@@ -148,7 +148,6 @@ const ChangeInfo = ({ route, navigation }) => {
         address_detail: addressDetail,
       })
       .then(function (response) {
-        console.log("Res:", response.data);
         dispatch(addUserInfo(response.data));
         Alert.alert("Thông báo", "Đổi thông tin thành công!", [
           { text: "OK", onPress: () => navigation.goBack() },
