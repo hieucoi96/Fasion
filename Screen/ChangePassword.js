@@ -1,9 +1,11 @@
 import React, { useState, useRef } from "react";
 import { StyleSheet, Text, View, TouchableOpacity, TextInput, ActivityIndicator, Alert, } from "react-native";
 import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
-import { initializeApp } from "firebase/app";
-import { getAuth, PhoneAuthProvider, signInWithCredential, } from "firebase/auth";
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getAuth, PhoneAuthProvider, signInWithCredential, initializeAuth, } from "firebase/auth";
 import axios from "axios";
+import { getReactNativePersistence } from "firebase/auth/react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBssvdQ9W3xe5nnW-tjL8sIiXwOnBBCRfU",
@@ -15,8 +17,17 @@ const firebaseConfig = {
   measurementId: "G-56P8K2YF4Y",
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth();
+let app;
+let auth;
+if (getApps().length < 1) {
+  app = initializeApp(firebaseConfig);
+  auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(AsyncStorage),
+  });
+} else {
+  app = getApp();
+  auth = getAuth();
+}
 
 const ChangePassword = ({ navigation }) => {
   const recaptchaVerifier = useRef(null);
@@ -26,6 +37,7 @@ const ChangePassword = ({ navigation }) => {
   const [message, showMessage] = useState("");
   const [phone_number, setPhoneNumber] = useState("");
   const [stage, setStage] = useState(1);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const instance = axios.create({
     baseURL: "https://hieuhmph12287-lab5.herokuapp.com/",
@@ -33,8 +45,14 @@ const ChangePassword = ({ navigation }) => {
   });
 
   const confirmClicked = async () => {
+    setErrorMessage("");
     if (stage === 1) {
       try {
+        let phone_regex = /(0[3|5|7|8|9])+([0-9]{8})\b/;
+        if (!phone_regex.test(currentInput)) {
+          setErrorMessage("Số điện thoại không hợp lệ");
+          return;
+        }
         setLoading(true);
         const phoneProvider = new PhoneAuthProvider(auth);
         const verificationId = await phoneProvider.verifyPhoneNumber(
@@ -54,12 +72,17 @@ const ChangePassword = ({ navigation }) => {
       setLoading(false);
     } else if (stage === 2) {
       try {
+        let otp_regex = /^[0-9]{1,6}$/;
+        if (!otp_regex.test(currentInput)) {
+          setErrorMessage("Mã OTP không hợp lệ");
+          return;
+        }
         setLoading(true);
         const credential = PhoneAuthProvider.credential(
           verificationId,
           currentInput
         );
-        console.log("credential: ", credential);
+
         await signInWithCredential(auth, credential);
         showMessage({
           text: "Mã xác nhận hợp lệ, vui lòng nhập mật khẩu mới!",
@@ -74,6 +97,13 @@ const ChangePassword = ({ navigation }) => {
       }
       setLoading(false);
     } else {
+      let password_regex = /^([a-zA-Z0-9@*#]{8,15})$/;
+      if (!password_regex.test(currentInput)) {
+        setErrorMessage(
+          "Mật khẩu phải từ 8 đến 15 ký tự và chỉ bao gồm chữ, số hoặc @, #, *"
+        );
+        return;
+      }
       setLoading(true);
       instance
         .post("/users/changePassword", {
@@ -81,7 +111,6 @@ const ChangePassword = ({ navigation }) => {
           password: currentInput,
         })
         .then(function (response) {
-          console.log(response);
           setLoading(false);
           Alert.alert("Thông báo", "Đổi mật khẩu thành công!", [
             { text: "OK", onPress: () => navigation.navigate("Login") },
@@ -150,6 +179,19 @@ const ChangePassword = ({ navigation }) => {
             }}
           ></Text>
         )}
+        {errorMessage ? (
+          <Text
+            style={{
+              color: "red",
+              fontSize: 12,
+              opacity: 0.7,
+              paddingLeft: 4,
+              marginTop: 0,
+            }}
+          >
+            {errorMessage}
+          </Text>
+        ) : null}
       </View>
       <TouchableOpacity
         style={styles.button_login}
@@ -219,7 +261,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 41,
+    marginTop: 26,
   },
   text_login_text: {
     color: "#FFFFFF",
