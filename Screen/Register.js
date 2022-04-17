@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, Alert, ActivityIndicator, } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, Alert, ActivityIndicator, KeyboardAvoidingView, } from "react-native";
 import axios from "axios";
 
 const Register = ({ navigation }) => {
@@ -11,7 +11,6 @@ const Register = ({ navigation }) => {
 
   const instance = axios.create({
     baseURL: "https://hieuhmph12287-lab5.herokuapp.com/",
-    timeout: 1000,
   });
 
   const userResgister = () => {
@@ -62,7 +61,10 @@ const Register = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
       <Text style={styles.brand}>fasions.</Text>
       <Text style={styles.title}>Đăng ký ngay nào</Text>
 
@@ -128,7 +130,7 @@ const Register = ({ navigation }) => {
           <Text style={styles.text_login_text}>Đăng ký</Text>
         )}
       </TouchableOpacity>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -141,7 +143,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: "4%",
   },
   brand: {
-    fontFamily: "Roboto",
+    fontFamily: "Open_Sans_Bold",
     fontStyle: "normal",
     fontWeight: "bold",
     fontSize: 40,
@@ -149,7 +151,7 @@ const styles = StyleSheet.create({
   },
   title: {
     marginTop: 43,
-    fontFamily: "Roboto",
+    fontFamily: "Open_Sans_Bold",
     fontStyle: "normal",
     fontWeight: "bold",
     fontSize: 16,

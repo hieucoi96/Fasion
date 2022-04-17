@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import {StyleSheet, Text, View, TouchableOpacity, TextInput, Alert, ActivityIndicator, } from "react-native";
+import React, { useState, useEffect } from "react";
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, Alert, ActivityIndicator, KeyboardAvoidingView, } from "react-native";
 import { useFonts } from "expo-font";
 import Ripple from "react-native-material-ripple";
 import axios from "axios";
@@ -9,23 +9,25 @@ import { addUserInfo } from "../store/itemAction";
 const Login = ({ navigation, notifyToken }) => {
   const dispatch = useDispatch();
   const [phone_number, setPhone] = useState("0977052703");
-  const [password, setPassword] = useState("12345678");
+  const [password, setPassword] = useState("123456789");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  if (!notifyToken) {
-    console.log("Can't get notifyToken: ", notifyToken);
-  }
-
   const instance = axios.create({
     baseURL: "https://hieuhmph12287-lab5.herokuapp.com/",
-    timeout: 1000,
   });
 
   const [loaded] = useFonts({
     Open_Sans: require("../assets/fonts/OpenSans-Regular.ttf"),
     Roboto: require("../assets/fonts/Roboto-Regular.ttf"),
+    Open_Sans_Bold: require("../assets/fonts/OpenSans-Bold.ttf"),
   });
+
+  useEffect(() => {
+    navigation.addListener("beforeRemove", (e) => {
+      e.preventDefault();
+    });
+  }, []);
 
   if (!loaded) {
     return null;
@@ -40,10 +42,9 @@ const Login = ({ navigation, notifyToken }) => {
     }
     let password_regex = /^([a-zA-Z0-9@*#]{8,15})$/;
     if (!password_regex.test(password)) {
-      setErrorMessage("Mật khẩu không hợp lệ");
+      setErrorMessage("Mật khẩu không hợp lệ");   
       return;
     }
-
     setLoading(true);
     instance
       .post("/users/loginUser", {
@@ -68,7 +69,10 @@ const Login = ({ navigation, notifyToken }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
       <Text style={styles.brand}>fasions.</Text>
       <Text style={styles.title}>Đăng nhập với số điện thoại của bạn</Text>
 
@@ -97,6 +101,7 @@ const Login = ({ navigation, notifyToken }) => {
           />
         </View>
         <TouchableOpacity
+          style={{ alignSelf: "flex-end" }}
           disabled={loading}
           onPress={() => {
             navigation.navigate("ChangePassword");
@@ -147,7 +152,7 @@ const Login = ({ navigation, notifyToken }) => {
           <Text style={styles.text_register_text}>Đăng ký</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -160,7 +165,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: "4%",
   },
   brand: {
-    fontFamily: "Roboto",
+    fontFamily: "Open_Sans_Bold",
     fontStyle: "normal",
     fontWeight: "bold",
     fontSize: 40,
@@ -168,7 +173,7 @@ const styles = StyleSheet.create({
   },
   title: {
     marginTop: 43,
-    fontFamily: "Roboto",
+    fontFamily: "Open_Sans_Bold",
     fontStyle: "normal",
     fontWeight: "bold",
     fontSize: 16,
@@ -198,7 +203,7 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   text_register_text: {
-    fontFamily: "Roboto",
+    fontFamily: "Open_Sans_Bold",
     fontStyle: "normal",
     fontWeight: "bold",
     textDecorationLine: "underline",
@@ -231,25 +236,6 @@ const styles = StyleSheet.create({
   button_container: {
     marginTop: 33,
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  button_login_google: {
-    flexDirection: "row",
-    borderWidth: 1,
-    borderColor: "#000000",
-    width: "45%",
-    height: 42,
-    marginRight: "10%",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  button_login_facebook: {
-    flexDirection: "row",
-    borderWidth: 1,
-    borderColor: "#000000",
-    width: "45%",
-    height: 42,
     alignItems: "center",
     justifyContent: "center",
   },
