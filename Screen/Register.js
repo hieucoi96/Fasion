@@ -1,6 +1,17 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, Alert, ActivityIndicator, KeyboardAvoidingView, } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+} from "react-native";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { addUserInfo } from "../store/itemAction";
 
 const Register = ({ navigation }) => {
   const [phone_number, setPhone] = useState("");
@@ -20,7 +31,8 @@ const Register = ({ navigation }) => {
       setErrorMessage("Số điện thoại không hợp lệ");
       return;
     }
-    let email_regex = /^((([!#$%&'*+\-/=?^_`{|}~\w])|([!#$%&'*+\-/=?^_`{|}~\w][!#$%&'*+\-/=?^_`{|}~\.\w]{0,}[!#$%&'*+\-/=?^_`{|}~\w]))[@]\w+([-.]\w+)*\.\w+([-.]\w+)*)$/;
+    let email_regex =
+      /^((([!#$%&'*+\-/=?^_`{|}~\w])|([!#$%&'*+\-/=?^_`{|}~\w][!#$%&'*+\-/=?^_`{|}~\.\w]{0,}[!#$%&'*+\-/=?^_`{|}~\w]))[@]\w+([-.]\w+)*\.\w+([-.]\w+)*)$/;
     if (!email_regex.test(email)) {
       setErrorMessage("Email không hợp lệ");
       return;
@@ -45,11 +57,13 @@ const Register = ({ navigation }) => {
         Alert.alert("Thông báo", "Đăng ký tài khoản thành công!", [
           {
             text: "OK",
-            onPress: () =>
+            onPress: () => {
+              dispatch(addUserInfo(response.data));
               navigation.navigate("MainStack", {
                 params: { phone_number },
                 screen: "Home",
-              }),
+              });
+            },
           },
         ]);
       })
