@@ -1,10 +1,12 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import LottieView from "lottie-react-native";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { addUserInfo } from "../store/itemAction";
 
 const SplashScreen = ({ navigation }) => {
   const token = useSelector((state) => state.userReducer.token);
+  const dispatch = useDispatch();
   return (
     <View style={styles.container}>
       <LottieView
@@ -14,12 +16,10 @@ const SplashScreen = ({ navigation }) => {
         speed={1.5}
         autoPlay
         onAnimationFinish={() => {
-          console.log("hhh");
+          dispatch(addUserInfo({ showSplash: false }));
           if (!token) {
-            console.log("log");
             navigation.navigate("Login");
           } else {
-            console.log("main");
             navigation.navigate("MainStack");
           }
         }}

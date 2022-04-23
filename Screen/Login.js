@@ -51,13 +51,8 @@ const Login = ({ navigation, notifyToken }) => {
         notifyToken,
       })
       .then(function (response) {
-        const token = response.data.token;
         setLoading(false);
         dispatch(addUserInfo(response.data));
-        navigation.navigate("MainStack", {
-          params: { phone_number, token },
-          screen: "Home",
-        });
       })
       .catch(function (error) {
         setLoading(false);
@@ -150,6 +145,13 @@ const Login = ({ navigation, notifyToken }) => {
           <Text style={styles.text_register_text}>Đăng ký</Text>
         </TouchableOpacity>
       </View>
+      <TouchableOpacity
+        onPress={() => {
+          dispatch(addUserInfo({ token: "1" }));
+        }}
+      >
+        <Text style={styles.text_bypass}>Bỏ qua đăng nhập</Text>
+      </TouchableOpacity>
     </KeyboardAvoidingView>
   );
 };
@@ -231,11 +233,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 36,
   },
-  button_container: {
-    marginTop: 33,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+  text_bypass: {
+    marginTop: 20,
+    fontWeight: "bold",
+    color: "#b0aeae",
   },
 });
 

@@ -14,6 +14,7 @@ import { useDispatch } from "react-redux";
 import { addUserInfo } from "../store/itemAction";
 
 const Register = ({ navigation }) => {
+  const dispatch = useDispatch();
   const [phone_number, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
@@ -59,10 +60,6 @@ const Register = ({ navigation }) => {
             text: "OK",
             onPress: () => {
               dispatch(addUserInfo(response.data));
-              navigation.navigate("MainStack", {
-                params: { phone_number },
-                screen: "Home",
-              });
             },
           },
         ]);
