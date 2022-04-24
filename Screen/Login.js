@@ -16,8 +16,9 @@ import { addUserInfo } from "../store/itemAction";
 
 const Login = ({ navigation, notifyToken }) => {
   const dispatch = useDispatch();
-  const [phone_number, setPhone] = useState("0977052703");
-  const [password, setPassword] = useState("");
+
+  const [phone_number, setPhone] = useState("0968641001");
+  const [password, setPassword] = useState("ductest123");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -153,6 +154,8 @@ const Login = ({ navigation, notifyToken }) => {
         <Text style={styles.text_bypass}>Bỏ qua đăng nhập</Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>
+    </View>
+
   );
 };
 
