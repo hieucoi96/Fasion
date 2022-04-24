@@ -1,19 +1,51 @@
 import React, { useState } from "react";
-import {StyleSheet, Text, View, TouchableOpacity, TextInput, Alert, ActivityIndicator,} from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+} from "react-native";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { addUserInfo } from "../store/itemAction";
 
 const Register = ({ navigation }) => {
+  const dispatch = useDispatch();
   const [phone_number, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const instance = axios.create({
     baseURL: "https://hieuhmph12287-lab5.herokuapp.com/",
-    timeout: 1000,
   });
 
   const userResgister = () => {
+    setErrorMessage("");
+    let phone_regex = /(0[3|5|7|8|9])+([0-9]{8})\b/;
+    if (!phone_regex.test(phone_number)) {
+      setErrorMessage("Số điện thoại không hợp lệ");
+      return;
+    }
+    let email_regex =
+      /^((([!#$%&'*+\-/=?^_`{|}~\w])|([!#$%&'*+\-/=?^_`{|}~\w][!#$%&'*+\-/=?^_`{|}~\.\w]{0,}[!#$%&'*+\-/=?^_`{|}~\w]))[@]\w+([-.]\w+)*\.\w+([-.]\w+)*)$/;
+    if (!email_regex.test(email)) {
+      setErrorMessage("Email không hợp lệ");
+      return;
+    }
+    let password_regex = /^([a-zA-Z0-9@*#]{8,15})$/;
+    if (!password_regex.test(password)) {
+      setErrorMessage(
+        "Mật khẩu phải từ 8 đến 15 ký tự và chỉ bao gồm chữ, số hoặc @, #, *"
+      );
+      return;
+    }
+
     setLoading(true);
     instance
       .post("/users/registerUser", {
@@ -22,16 +54,13 @@ const Register = ({ navigation }) => {
         password,
       })
       .then(function (response) {
-        console.log("Status:", response.status);
         setLoading(false);
         Alert.alert("Thông báo", "Đăng ký tài khoản thành công!", [
           {
             text: "OK",
-            onPress: () =>
-              navigation.navigate("MainStack", {
-                params: { phone_number },
-                screen: "Home",
-              }),
+            onPress: () => {
+              dispatch(addUserInfo(response.data));
+            },
           },
         ]);
       })
@@ -43,7 +72,10 @@ const Register = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
       <Text style={styles.brand}>fasions.</Text>
       <Text style={styles.title}>Đăng ký ngay nào</Text>
 
@@ -82,6 +114,19 @@ const Register = ({ navigation }) => {
             placeholderTextColor="#636366"
           />
         </View>
+        {errorMessage ? (
+          <Text
+            style={{
+              color: "red",
+              fontSize: 12,
+              opacity: 0.7,
+              paddingLeft: 4,
+              marginTop: 16,
+            }}
+          >
+            {errorMessage}
+          </Text>
+        ) : null}
       </View>
 
       <TouchableOpacity
@@ -96,7 +141,7 @@ const Register = ({ navigation }) => {
           <Text style={styles.text_login_text}>Đăng ký</Text>
         )}
       </TouchableOpacity>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -109,7 +154,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: "4%",
   },
   brand: {
-    fontFamily: "Roboto",
+    fontFamily: "Open_Sans_Bold",
     fontStyle: "normal",
     fontWeight: "bold",
     fontSize: 40,
@@ -117,7 +162,7 @@ const styles = StyleSheet.create({
   },
   title: {
     marginTop: 43,
-    fontFamily: "Roboto",
+    fontFamily: "Open_Sans_Bold",
     fontStyle: "normal",
     fontWeight: "bold",
     fontSize: 16,
@@ -148,7 +193,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 41,
+    marginTop: 36,
   },
   text_login_text: {
     color: "#FFFFFF",
