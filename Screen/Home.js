@@ -4,26 +4,29 @@ import {
   Text,
   View,
   FlatList,
-  Image,
   TouchableOpacity,
-  ScrollView,
   SafeAreaView,
   ActivityIndicator,
   Alert,
 } from "react-native";
 import NumberFormat from "react-number-format";
 import axios from "axios";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { logOut } from "../store/itemAction";
 import { useIsFocused } from "@react-navigation/native";
+import { Image } from "react-native-expo-image-cache";
 
+//Giao diện item danh sách New Arrival
 const ItemHorizontal = ({ item, onPress, backgroundColor, textColor }) => (
   <TouchableOpacity
     onPress={onPress}
     style={[styles.itemHorizontal, backgroundColor]}
     activeOpacity={1}
   >
-    <Image style={styles.imgHorizontal} source={{ uri: item.src }} />
-    <Text style={[styles.nameHorizontal, textColor]}>{item.name}</Text>
+    <Image style={styles.imgHorizontal} uri={item.src} />
+    <Text style={[styles.nameHorizontal, textColor]} numberOfLines={1}>
+      {item.name}
+    </Text>
     <NumberFormat
       value={item.price}
       displayType={"text"}
@@ -38,13 +41,14 @@ const ItemHorizontal = ({ item, onPress, backgroundColor, textColor }) => (
   </TouchableOpacity>
 );
 
+//Giao diện item danh sách collection
 const ItemVertical = ({ item, onPress, backgroundColor, textColor }) => (
   <TouchableOpacity
     onPress={onPress}
     style={[styles.itemVertical, backgroundColor]}
     activeOpacity={1}
   >
-    <Image style={styles.imgVertical} source={{ uri: item.src }} />
+    <Image style={styles.imgVertical} uri={item.src} />
     <Text style={[styles.nameVertical, textColor]}>{item.name}</Text>
   </TouchableOpacity>
 );
@@ -54,6 +58,7 @@ const Home = ({ navigation, route }) => {
   const [verticalList, setVerticalList] = useState(null);
   const [loading, setLoading] = useState(false);
   const token = useSelector((state) => state.userReducer.token);
+  const dispatch = useDispatch();
   const isFocused = useIsFocused();
 
   const instance = axios.create({
@@ -61,6 +66,7 @@ const Home = ({ navigation, route }) => {
     headers: { "x-access-token": token },
   });
 
+  //Call Api lấy ds sản phầm và collection
   useEffect(() => {
     setLoading(true);
     const prod = () => {
@@ -75,18 +81,28 @@ const Home = ({ navigation, route }) => {
         setVerticalList(results[1].data);
       })
       .catch(function (error) {
-        console.log(error);
-        Alert.alert("Thông báo", "Có lỗi xảy ra: " + error.message);
+        //Check token đã hết hạn chưa trong trương hợp user auto login
+        if (error.message === "Invalid Token") {
+          Alert.alert(
+            "Thông báo",
+            "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!",
+            [{ text: "OK", onPress: () => dispatch(logOut()) }]
+          );
+        } else {
+          Alert.alert("Thông báo", "Có lỗi xảy ra: " + error.message);
+        }
       })
       .then(function () {
         setLoading(false);
       });
   }, [isFocused]);
 
+  //Xử lý khi ấn vào item new arrival
   function openProductDetails(item) {
     navigation.navigate("ProductDetails", { item, token });
   }
 
+  //Xử lý khi ấn vào item ds collection
   const openCollectionDetails = (c) => {
     navigation.navigate("Search", {
       params: {
@@ -104,6 +120,7 @@ const Home = ({ navigation, route }) => {
     });
   };
 
+  // 2 thg này viết tiếp phần giao diện item (viết dài)
   const renderItemHorizontal = ({ item }) => {
     const backgroundColor = "#ffffff";
     const color = "black";
@@ -171,7 +188,7 @@ const styles = StyleSheet.create({
   },
   title: {
     marginTop: 30,
-    fontFamily: "Roboto",
+    fontFamily: "Open_Sans_Bold",
     fontStyle: "normal",
     fontWeight: "bold",
     fontSize: 16,
@@ -185,13 +202,13 @@ const styles = StyleSheet.create({
   },
   nameHorizontal: {
     marginTop: 10,
-    fontFamily: "Roboto",
+    fontFamily: "Open_Sans_Bold",
     fontStyle: "normal",
     fontWeight: "bold",
     fontSize: 14,
   },
   price: {
-    fontFamily: "Roboto",
+    fontFamily: "Open_Sans_Bold",
     fontStyle: "normal",
     fontWeight: "bold",
     fontSize: 14,
@@ -209,7 +226,7 @@ const styles = StyleSheet.create({
   },
   nameVertical: {
     marginTop: 10,
-    fontFamily: "Roboto",
+    fontFamily: "Open_Sans_Bold",
     fontStyle: "normal",
     fontWeight: "bold",
     fontSize: 16,

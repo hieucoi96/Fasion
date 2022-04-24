@@ -43,15 +43,16 @@ const data = [
   {
     id: "58694a0f-3da1-471f-bd96-145346451e29d72",
     name: "Giày",
-    src: require("../assets/img_cata_15.png"),
+    src: require("../assets/giaynam.jpeg"),
   },
   {
     id: "58694a0f-3da1-471f-bd96-14555675675d72",
     name: "Túi xách",
-    src: require("../assets/img_cata_16.png"),
+    src: require("../assets/tuixachnam.jpeg"),
   },
 ];
 
+//Giao diện item
 const Item = ({ item, navigation }) => (
   <TouchableOpacity
     style={{ margin: 2.5 }}
@@ -112,7 +113,7 @@ const styles = StyleSheet.create({
   },
   text_catalog: {
     textAlign: "center",
-    fontFamily: "Roboto",
+    fontFamily: "Open_Sans_Bold",
     fontStyle: "normal",
     fontWeight: "bold",
     fontSize: 14,
