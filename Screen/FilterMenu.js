@@ -4,9 +4,7 @@ import {
   Text,
   View,
   FlatList,
-  Image,
   TouchableOpacity,
-  TextInput,
   ScrollView,
 } from "react-native";
 import Accordion from "react-native-collapsible/Accordion";
@@ -24,23 +22,6 @@ const FilterMenu = ({ navigation, route }) => {
       title: "Size",
       content: ["XS", "S", "M", "L", "XL", "XXL"],
     },
-    // {
-    //     title: 'Chất liệu',
-    //     content: ["Da", "Lông", "Cotton", "Len", "Sợi tổng hợp"]
-    // },
-    // {
-    //     title: 'Màu sắc',
-    //     content: [
-    //         {color: '#ffffff', name: 'Màu trắng'},
-    //         {color: '#636366', name: 'Màu ghi'},
-    //         {color: '#1C1C1E', name: 'Màu đen'},
-    //         {color: '#0075FF', name: 'Màu xanh'},
-    //         {color: '#FFC107', name: 'Màu vàng'},
-    //         {color: '#4CAF50', name: 'Màu xanh lá'},
-    //         {color: '#F44336', name: 'Màu đỏ'},
-    //         {color: '#D301A5', name: 'Màu tím'},
-    //     ]
-    // },
     {
       title: "Giá",
       content: "Lorem ipsum...",
@@ -49,8 +30,6 @@ const FilterMenu = ({ navigation, route }) => {
 
   const [activeSections, setActiveSections] = useState(["Size", "Giá"]);
   const [size, setSize] = useState(route.params.size ? route.params.size : "");
-  //   const [material, setMaterial] = useState("");
-  //   const [color, setColor] = useState("");
   const [low, setLow] = useState(route.params.low ? route.params.low : "");
   const [high, setHigh] = useState(route.params.high ? route.params.high : "");
 
@@ -59,6 +38,7 @@ const FilterMenu = ({ navigation, route }) => {
     setHigh(high);
   }, []);
 
+  //render component cho phần chọn giá
   const renderThumb = useCallback(() => <Thumb />, []);
   const renderRail = useCallback(() => <Rail />, []);
   const renderRailSelected = useCallback(() => <RailSelected />, []);
@@ -70,14 +50,6 @@ const FilterMenu = ({ navigation, route }) => {
       setSize(selectedSize);
     }
   }
-
-  // function chooseMaterial(material) {
-  //   setMaterial(material);
-  // }
-
-  // function chooseColor(color) {
-  //   setColor(color);
-  // }
 
   const renderHeader = (section) => {
     return (
@@ -136,90 +108,6 @@ const FilterMenu = ({ navigation, route }) => {
         </ScrollView>
       );
     }
-    // if (section.title === "Chất liệu") {
-    //   return (
-    //     <ScrollView>
-    //       <FlatList
-    //         style={{ flex: 1, marginBottom: 30 }}
-    //         data={section.content}
-    //         renderItem={({ item, index }) => (
-    //           <TouchableOpacity
-    //             style={{
-    //               flex: 0.5,
-    //               margin: 5,
-    //               marginRight: 20,
-    //               borderBottomWidth: 0.5,
-    //               borderColor: "#DADADA",
-    //             }}
-    //             onPress={() => chooseMaterial(item)}
-    //             activeOpacity={1}
-    //           >
-    //             <View style={styles.item}>
-    //               <View
-    //                 style={{ flexDirection: "row", marginRight: 20, flex: 1 }}
-    //               >
-    //                 <Text style={styles.text_name}>{item}</Text>
-    //               </View>
-    //               {material === item && (
-    //                 <AntDesign name="check" size={20} color="black" />
-    //               )}
-    //             </View>
-    //           </TouchableOpacity>
-    //         )}
-    //         keyExtractor={(item) => item}
-    //         showsVerticalScrollIndicator={false}
-    //       />
-    //     </ScrollView>
-    //   );
-    // }
-    // if (section.title === "Màu sắc") {
-    //   return (
-    //     <ScrollView>
-    //       <FlatList
-    //         style={{ flex: 1, marginBottom: 30 }}
-    //         data={section.content}
-    //         renderItem={({ item, index }) => (
-    //           <TouchableOpacity
-    //             style={{
-    //               flex: 0.5,
-    //               margin: 5,
-    //               marginRight: 20,
-    //               borderBottomWidth: 0.5,
-    //               borderColor: "#DADADA",
-    //             }}
-    //             onPress={() => chooseColor(item.name)}
-    //             activeOpacity={1}
-    //           >
-    //             <View style={styles.item}>
-    //               <View
-    //                 style={{
-    //                   flexDirection: "row",
-    //                   marginRight: 20,
-    //                   flex: 1,
-    //                   alignItems: "center",
-    //                 }}
-    //               >
-    //                 <View
-    //                   style={[
-    //                     styles.square,
-    //                     { backgroundColor: item.color, marginRight: 15 },
-    //                   ]}
-    //                 />
-    //                 <Text style={styles.text_name}>{item.name}</Text>
-    //               </View>
-    //               {color === item.name && (
-    //                 <AntDesign name="check" size={20} color="black" />
-    //               )}
-    //             </View>
-    //           </TouchableOpacity>
-    //         )}
-    //         keyExtractor={(item) => item.name}
-    //         numColumns={2}
-    //         showsVerticalScrollIndicator={false}
-    //       />
-    //     </ScrollView>
-    //   );
-    // }
     if (section.title === "Giá") {
       return (
         <View style={styles.content}>
@@ -279,7 +167,6 @@ const FilterMenu = ({ navigation, route }) => {
       <TouchableOpacity
         style={[styles.btnApply, { marginBottom: 12 }]}
         onPress={() => {
-          console.log(size + " - " + low + " - " + high);
           if (low === 200000 && high === 10000000) {
             navigation.navigate("ListProduct", {
               low: null,
@@ -327,6 +214,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontStyle: "normal",
     fontWeight: "bold",
+    fontFamily: "Open_Sans_Bold",
     fontSize: 14,
     lineHeight: 21,
     flex: 1,

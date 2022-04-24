@@ -1,18 +1,29 @@
 import React, { useState, useEffect } from "react";
-import {StyleSheet, Text, View, FlatList, ImageBackground, Image, TouchableOpacity, SafeAreaView, ActivityIndicator,} from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  ImageBackground,
+  Image,
+  TouchableOpacity,
+  SafeAreaView,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
 import NumberFormat from "react-number-format";
 import { useDispatch, useSelector } from "react-redux";
 import { changeFav } from "../store/itemAction";
 import axios from "axios";
-import { DATA_PRODUCT } from "../api/constants";
+import { addUserInfo } from "../store/itemAction";
 
 const heartOutline = require("../assets/icon_heart_outline.png");
 const heartFull = require("../assets/icon_heart_full.png");
 
 const ListProduct = ({ route, navigation }) => {
-  const { collection_id, type, gender } = route.params ?? {};
+  const { collection_id, type, gender, low, high, size } = route.params ?? {};
   const [loading, setLoading] = useState(false);
-  const [listProduct, setListProduct] = useState(null);
+  const [listProduct, setListProduct] = useState([]);
   const token = useSelector((state) => state.userReducer.token);
 
   const instance = axios.create({
@@ -20,39 +31,59 @@ const ListProduct = ({ route, navigation }) => {
     headers: { "x-access-token": token },
   });
 
+  //Call api lấy ds sản phẩm (dựa vào collection_id || type, gender + low, high, size từ bộ lọc (nếu có))
   useEffect(() => {
     setLoading(true);
+    const controller = new AbortController();
     if (collection_id) {
       instance
-        .get("products/getProducts/" + collection_id)
+        .get(
+          `products/getProducts/${collection_id}${low ? "&" + low : "&0"}${
+            high ? "&" + high : "&100000000"
+          }${size ? "&" + size : "&null"}`,
+          { signal: controller.signal }
+        )
         .then(function (response) {
           setListProduct(response.data);
         })
         .catch(function (error) {
-          console.log(error);
+          if (!axios.isCancel(error)) {
+            Alert.alert("Thông báo", "Có lỗi xảy ra: " + error.message);
+            console.log(error);
+          }
         })
         .then(function () {
           setLoading(false);
         });
     } else {
       instance
-        .get("products/getProducts/" + gender + "&" + type)
+        .get(
+          `products/getProducts/${gender}&${type}&${low ? low : "0"}&${
+            high ? high : "100000000"
+          }&${size ? size : "null"}`,
+          { signal: controller.signal }
+        )
         .then(function (response) {
           setListProduct(response.data);
         })
         .catch(function (error) {
-          console.log(error);
+          if (!axios.isCancel(error)) {
+            Alert.alert("Thông báo", "Có lỗi xảy ra: " + error.message);
+            console.log(error);
+          }
         })
         .then(function () {
           setLoading(false);
         });
     }
-  }, [collection_id]);
-
-  let data = DATA_PRODUCT;
+    return () => {
+      controller.abort();
+    };
+  }, [collection_id, gender, type, low, high, size]);
 
   const [selectedView, setSelectedView] = useState("grid");
 
+  // Xử lý khi bấm button đổi kiểu hiển thị
   function selectView() {
     if (selectedView === "grid") {
       setSelectedView("list");
@@ -61,7 +92,8 @@ const ListProduct = ({ route, navigation }) => {
     }
   }
 
-  const Item = ({ item, addOrRemoveFav, favorite, textColor }) => {
+  //Giao diện item
+  const Item = ({ item }) => {
     const fav_product_list = useSelector((state) => state.userReducer.favorite);
     const dispatch = useDispatch();
 
@@ -81,10 +113,16 @@ const ListProduct = ({ route, navigation }) => {
             <TouchableOpacity
               style={styles.btn}
               onPress={() => {
+                if (token === "1") {
+                  dispatch(addUserInfo({ token: null }));
+                  return;
+                }
+                //Call api favorite và đổi fav local app (chạy song song)
                 instance
                   .get("/users/addFavorite/" + item.product_id)
                   .then(function (response) {})
                   .catch(function (error) {
+                    Alert.alert("Thông báo", "Có lỗi xảy ra: " + error.message);
                     console.log(error);
                   });
 
@@ -178,16 +216,9 @@ const ListProduct = ({ route, navigation }) => {
     );
   };
 
-  const [favorite, setFavorite] = useState([]);
-
+  //Viết dài
   const renderItem = ({ item }) => {
-    return (
-      <Item
-        item={item}
-        addOrRemoveFav={() => addOrRemoveFav(item.id)}
-        favorite={favorite}
-      />
-    );
+    return <Item item={item} />;
   };
 
   return (
@@ -201,14 +232,52 @@ const ListProduct = ({ route, navigation }) => {
           }}
         >
           <TouchableOpacity
-            onPress={() => navigation.navigate("FilterMenu")}
+            style={{ flexDirection: "row" }}
+            hitSlop={{ top: 15, left: 15, right: 15, bottom: 15 }}
+            onPress={() =>
+              navigation.navigate("FilterMenu", { size, low, high })
+            }
             activeOpacity={1}
           >
-            <Text style={styles.btn_filter}>Bộ lọc</Text>
+            <Text style={styles.btn_filter}>
+              Bộ lọc
+              {size ? ` ( size ${size} )` : ""}
+            </Text>
+            {low && (
+              <NumberFormat
+                value={low}
+                displayType={"text"}
+                thousandSeparator={true}
+                prefix={" ( từ "}
+                suffix={"đ đến "}
+                renderText={(value, props) => (
+                  <Text style={styles.btn_filter} {...props}>
+                    {value}
+                  </Text>
+                )}
+              />
+            )}
+            {high && (
+              <NumberFormat
+                value={high}
+                displayType={"text"}
+                thousandSeparator={true}
+                suffix={"đ )"}
+                renderText={(value, props) => (
+                  <Text style={styles.btn_filter} {...props}>
+                    {value}
+                  </Text>
+                )}
+              />
+            )}
           </TouchableOpacity>
         </View>
         <View
-          style={{ flexDirection: "row", flex: 1, justifyContent: "flex-end" }}
+          style={{
+            flexDirection: "row",
+            flex: 0.5,
+            justifyContent: "flex-end",
+          }}
         >
           <TouchableOpacity onPress={() => selectView()}>
             <Image
@@ -239,27 +308,41 @@ const ListProduct = ({ route, navigation }) => {
           </View>
         ) : (
           <>
-            {selectedView === "grid" ? (
-              <FlatList
-                style={{ flex: 1, marginTop: 0 }}
-                data={listProduct}
-                renderItem={renderItem}
-                keyExtractor={(item) => item.product_id}
-                numColumns={2}
-                key={1}
-                showsVerticalScrollIndicator={false}
-                columnWrapperStyle={{ justifyContent: "space-between" }}
-              />
+            {listProduct.length === 0 ? (
+              <Text
+                style={{
+                  fontSize: 18,
+                  color: "#a3a3a0",
+                  textAlign: "center",
+                }}
+              >
+                Không tìm thấy sản phẩm nào
+              </Text>
             ) : (
-              <FlatList
-                style={{ flex: 1, marginTop: 0 }}
-                data={listProduct}
-                renderItem={renderItem}
-                keyExtractor={(item) => item.product_id}
-                numColumns={1}
-                key={0}
-                showsVerticalScrollIndicator={false}
-              />
+              <>
+                {selectedView === "grid" ? (
+                  <FlatList
+                    style={{ flex: 1, marginTop: 0 }}
+                    data={listProduct}
+                    renderItem={renderItem}
+                    keyExtractor={(item) => item.product_id}
+                    numColumns={2}
+                    key={1}
+                    showsVerticalScrollIndicator={false}
+                    columnWrapperStyle={{ justifyContent: "space-between" }}
+                  />
+                ) : (
+                  <FlatList
+                    style={{ flex: 1, marginTop: 0 }}
+                    data={listProduct}
+                    renderItem={renderItem}
+                    keyExtractor={(item) => item.product_id}
+                    numColumns={1}
+                    key={0}
+                    showsVerticalScrollIndicator={false}
+                  />
+                )}
+              </>
             )}
           </>
         )}
@@ -271,6 +354,7 @@ const ListProduct = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: "center",
     backgroundColor: "#ffffff",
   },
   grid: {
@@ -291,7 +375,7 @@ const styles = StyleSheet.create({
   },
   text_status: {
     marginTop: 7,
-    fontFamily: "Open_Sans",
+    fontFamily: "Open_Sans_Bold",
     fontStyle: "normal",
     fontWeight: "bold",
     fontSize: 10,

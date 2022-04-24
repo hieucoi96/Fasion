@@ -1,14 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { useIsFocused } from "@react-navigation/native";
-import {StyleSheet, Text, View, FlatList, ImageBackground, Image, TouchableOpacity, SafeAreaView, ActivityIndicator,} from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  ImageBackground,
+  Image,
+  TouchableOpacity,
+  SafeAreaView,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
 import NumberFormat from "react-number-format";
 import { useDispatch, useSelector } from "react-redux";
-import { changeFav } from "../store/itemAction";
+import { changeFav, addUserInfo } from "../store/itemAction";
 import axios from "axios";
 
 const heartOutline = require("../assets/icon_heart_outline.png");
 const heartFull = require("../assets/icon_heart_full.png");
 
+//Giao diện item
 const Item = ({ item, addOrRemoveFav, favorite, onPress }) => {
   return (
     <TouchableOpacity
@@ -66,7 +78,7 @@ const Item = ({ item, addOrRemoveFav, favorite, onPress }) => {
 const Favorite = ({ navigation }) => {
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
-  const [listProduct, setListProduct] = useState(null);
+  const [listProduct, setListProduct] = useState([]);
   const [loading, setLoading] = useState(false);
   const fav_product_list = useSelector((state) => state.userReducer.favorite);
   const token = useSelector((state) => state.userReducer.token);
@@ -75,21 +87,36 @@ const Favorite = ({ navigation }) => {
     headers: { "x-access-token": token },
   });
 
+  //Call api danh sách sp yêu thích
   useEffect(() => {
-    setLoading(true);
-    instance
-      .post("products/getFavoriteProducts", { product_ids: fav_product_list })
-      .then(function (response) {
-        setListProduct(response.data);
-      })
-      .catch(function (error) {
-        console.log(error);
-      })
-      .then(function () {
-        setLoading(false);
-      });
+    const controller = new AbortController();
+    if (token !== "1" && token !== null) {
+      setLoading(true);
+      instance
+        .post(
+          "products/getFavoriteProducts",
+          { product_ids: fav_product_list },
+          { signal: controller.signal }
+        )
+        .then(function (response) {
+          setListProduct(response.data);
+        })
+        .catch(function (error) {
+          if (!axios.isCancel(error)) {
+            Alert.alert("Thông báo", "Có lỗi xảy ra: " + error.message);
+            console.log(error);
+          }
+        })
+        .then(function () {
+          setLoading(false);
+        });
+    }
+    return () => {
+      controller.abort();
+    };
   }, [isFocused]);
 
+  //Giao diện item
   const renderItem = ({ item }) => {
     return (
       <Item
@@ -97,9 +124,10 @@ const Favorite = ({ navigation }) => {
         addOrRemoveFav={() => {
           instance
             .get("/users/addFavorite/" + item.product_id)
-            .then(function (response) { })
+            .then(function (response) {})
             .catch(function (error) {
               console.log(error);
+              Alert.alert("Thông báo", "Có lỗi xảy ra: " + error.message);
             });
 
           dispatch(changeFav(item.product_id));
@@ -112,22 +140,64 @@ const Favorite = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {loading ? (
-        <View
-          style={{ justifyContent: "center", alignItems: "center", flex: 1 }}
-        >
-          <ActivityIndicator size="large" color="#000000" />
-        </View>
+      {token === "1" || !token ? (
+        <>
+          <Text style={{ textAlign: "center" }}>
+            Vui lòng{" "}
+            <Text
+              style={{
+                fontFamily: "Open_Sans_Bold",
+                fontWeight: "bold",
+                textDecorationLine: "underline",
+                fontSize: 16,
+              }}
+              onPress={() => {
+                dispatch(addUserInfo({ token: null }));
+              }}
+            >
+              Đăng nhập
+            </Text>{" "}
+            để hiển thị danh sách sản phẩm
+          </Text>
+        </>
       ) : (
-        <FlatList
-          style={{ flex: 1 }}
-          data={listProduct}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.product_id}
-          numColumns={2}
-          showsVerticalScrollIndicator={false}
-          columnWrapperStyle={{ justifyContent: "space-between" }}
-        />
+        <>
+          {loading ? (
+            <View
+              style={{
+                justifyContent: "center",
+                alignItems: "center",
+                flex: 1,
+              }}
+            >
+              <ActivityIndicator size="large" color="#000000" />
+            </View>
+          ) : (
+            <>
+              {listProduct.length === 0 ? (
+                <Text
+                  style={{
+                    fontSize: 18,
+                    color: "#a3a3a0",
+                    textAlign: "center",
+                  }}
+                >
+                  Không tìm thấy sản phẩm nào
+                </Text>
+              ) : (
+                <FlatList
+                  style={{ flex: 1, paddingHorizontal: "4%" }}
+                  data={listProduct}
+                  renderItem={renderItem}
+                  keyExtractor={(item) => item.product_id}
+                  numColumns={2}
+                  showsVerticalScrollIndicator={false}
+                  columnWrapperStyle={{ justifyContent: "space-between" }}
+                />
+              )}
+            </>
+          )}
+        </>
       )}
     </SafeAreaView>
   );
@@ -136,8 +206,8 @@ const Favorite = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: "center",
     backgroundColor: "#ffffff",
-    paddingHorizontal: "4%",
   },
   item: {},
   image_fav: {
@@ -147,7 +217,7 @@ const styles = StyleSheet.create({
   },
   text_status: {
     marginTop: 7,
-    fontFamily: "Open_Sans",
+    fontFamily: "Open_Sans_Bold",
     fontStyle: "normal",
     fontWeight: "bold",
     fontSize: 10,
