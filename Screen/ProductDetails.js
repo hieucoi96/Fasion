@@ -9,6 +9,9 @@ import {
   Dimensions,
   FlatList,
   Animated,
+  ActivityIndicator,
+  LogBox,
+  Alert,
 } from "react-native";
 
 import Carousel, {
@@ -22,93 +25,26 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Rating } from "react-native-ratings";
 import Parabolic from "react-native-parabolic";
 import { useDispatch, useSelector } from "react-redux";
-import { addItem, changeFav } from "../store/itemAction";
+import { changeFav } from "../store/itemAction";
 import ShoppingCartIcon from "../Component/ShoppingCartIcon";
 import { showMessage } from "react-native-flash-message";
-import { DATA_PRODUCT } from "../api/constants";
 import Ripple from "react-native-material-ripple";
 import LottieView from "lottie-react-native";
+import moment from "moment";
+import axios from "axios";
+import { addUserInfo } from "../store/itemAction";
 
 const heartOutline = require("../assets/icon_heart_outline.png");
 const heartFull = require("../assets/icon_heart_full.png");
 const windowWidth = Dimensions.get("screen").width;
-const windowHeight = Dimensions.get("screen").height;
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
-
-const Item = ({ item, addOrRemoveFav, favorite, onPress }) => {
-  const heartAnimation = useRef(null);
-  const isFirstRun = useRef(true);
-  useEffect(() => {
-    if (isFirstRun.current) {
-      if (favorite.indexOf(item) > -1) {
-        heartAnimation.current.play(12, 12);
-      } else {
-        heartAnimation.current.play(1, 1);
-      }
-      isFirstRun.current = false;
-    } else if (favorite.indexOf(item) > -1) {
-      heartAnimation.current.play(2, 12);
-    } else {
-      heartAnimation.current.play(1, 1);
-    }
-  }, [favorite]);
-  return (
-    <TouchableOpacity
-      style={{ marginRight: 5, marginBottom: 15, width: 170 }}
-      onPress={onPress}
-    >
-      <View>
-        <ImageBackground style={styles.image_fav} source={item.src}>
-          <TouchableOpacity onPress={addOrRemoveFav}>
-            <LottieView
-              ref={heartAnimation}
-              style={styles.iconFav_sub}
-              source={require("../assets/lotties/heart_animation_4.json")}
-              autoPlay={false}
-              loop={false}
-            />
-          </TouchableOpacity>
-        </ImageBackground>
-
-        <Text style={styles.text_sub_status}>{item.status}</Text>
-        <Text style={styles.text_sub_name} numberOfLines={1}>
-          {item.name}
-        </Text>
-
-        <NumberFormat
-          value={item.old_price}
-          displayType={"text"}
-          thousandSeparator={true}
-          suffix={" đ"}
-          renderText={(value, props) => (
-            <Text style={styles.text_sub_old_price} {...props}>
-              {value}
-            </Text>
-          )}
-        />
-
-        <NumberFormat
-          value={item.price}
-          displayType={"text"}
-          thousandSeparator={true}
-          suffix={" đ"}
-          renderText={(value, props) => (
-            <Text style={styles.text_sub_price} {...props}>
-              {value}
-            </Text>
-          )}
-        />
-      </View>
-    </TouchableOpacity>
-  );
-};
 
 const ProductDetails = ({ route, navigation }) => {
   const { item } = route.params;
 
   const dispatch = useDispatch();
-  const fav_product_list = useSelector((state) => state.favReducer.data);
-
+  const fav_product_list = useSelector((state) => state.userReducer.favorite);
+  const token = useSelector((state) => state.userReducer.token);
   const scrollViewRef = useRef();
   const parabolic = useRef();
   const add_to_cart = useRef();
@@ -122,13 +58,9 @@ const ProductDetails = ({ route, navigation }) => {
 
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
-  const [items, setItems] = useState([
-    { label: "S", value: "S" },
-    { label: "M", value: "M" },
-    { label: "L", value: "L" },
-    { label: "XL", value: "XL" },
-    { label: "XXL", value: "XXL" },
-  ]);
+  const [items, setItems] = useState([]);
+  const [outOfStock, setStock] = useState(false);
+  const [relatedProduct, setRelatedProduct] = useState([]);
 
   const [currentInfo, setCurrentInfo] = useState({
     price: item.variant[0].price,
@@ -136,16 +68,32 @@ const ProductDetails = ({ route, navigation }) => {
     color: item.variant[0].color,
   });
   const [activeSections, setActiveSections] = useState([]);
+  const [sections, setSections] = useState([
+    {
+      title: "Chi tiết sản phẩm",
+      content: item.product_detail
+        ? item.product_detail
+        : "Chưa có chi tiết sản phẩm",
+    },
+    { title: "Đánh giá", content: item.evaluate },
+  ]);
+
+  const [loading, setLoading] = useState(false);
 
   const [parabolicY, setParabolicY] = useState(-9999);
   const [activeSlide, setActiveSlide] = useState(0);
 
+  const instance = axios.create({
+    baseURL: "https://hieuhmph12287-lab5.herokuapp.com/",
+    headers: { "x-access-token": token },
+  });
+
+  useEffect(() => {
+    LogBox.ignoreLogs(["VirtualizedLists should never be nested"]);
+  }, []);
+
   useEffect(() => {
     navigation.setOptions({
-      // headerStyle: {
-      //     // opacity: headerOpacity,
-      //     backgroundColor: "green",
-      // },
       headerBackground: () => (
         <Animated.View
           style={{
@@ -162,15 +110,63 @@ const ProductDetails = ({ route, navigation }) => {
       headerTransparent: true,
     });
   }, [headerOpacity, navigation]);
+
   useEffect(() => {
     const sources = item.variant.reduce(function (result, item) {
       if (item.color === currentInfo.color) {
-        result.push({ label: item.size, value: item.v_id + "." + item.size });
+        result.push({
+          label: item.size,
+          value: item.variant_id + "." + item.size,
+        });
       }
       return result;
     }, []);
     setItems(sources);
   }, [currentInfo]);
+
+  useEffect(() => {
+    setStock(false);
+    if (value) {
+      let index = value.indexOf(".");
+      let v_id = value.substring(0, index);
+      let currentItem = item.variant.find((item) => item.variant_id === v_id);
+      if (currentItem) {
+        if (currentItem.stock === 0) {
+          setStock(true);
+        }
+      }
+    }
+  }, [value]);
+
+  useEffect(() => {
+    setLoading(true);
+    const controller = new AbortController();
+    instance
+      .post(
+        "/products/getRelatedProducts",
+        {
+          collection_id: item.collection_id,
+          type: item.type,
+          product_id: item.product_id,
+        },
+        { signal: controller.signal }
+      )
+      .then(function (response) {
+        setRelatedProduct(response.data);
+      })
+      .catch(function (error) {
+        if (!axios.isCancel(error)) {
+          Alert.alert("Thông báo", "Có lỗi xảy ra: " + error.message);
+          console.log(error);
+        }
+      })
+      .then(function () {
+        setLoading(false);
+      });
+    return () => {
+      controller.abort();
+    };
+  }, [item]);
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
@@ -213,6 +209,10 @@ const ProductDetails = ({ route, navigation }) => {
     </View>
   ));
 
+  const averageRate =
+    item.evaluate.reduce((total, next) => total + next.rate, 0) /
+    item.evaluate.length;
+
   const goToSlide = (index) => {
     carouselRef.current.snapToItem(index, true, true);
   };
@@ -221,7 +221,7 @@ const ProductDetails = ({ route, navigation }) => {
     return (
       <View style={styles.item}>
         <ParallaxImage
-          source={item.src}
+          source={{ uri: item.src }}
           containerStyle={styles.imageContainer}
           style={styles.image}
           parallaxFactor={0.4}
@@ -235,7 +235,16 @@ const ProductDetails = ({ route, navigation }) => {
     return (
       <Item
         item={item}
-        addOrRemoveFav={() => dispatch(changeFav(item, item.id))}
+        addOrRemoveFav={() => {
+          instance
+            .get("/users/addFavorite/" + item.product_id)
+            .then(function (response) {})
+            .catch(function (error) {
+              Alert.alert("Thông báo", "Có lỗi xảy ra: " + error.message);
+              console.log(error);
+            });
+          dispatch(changeFav(item.product_id));
+        }}
         favorite={fav_product_list}
         onPress={() => navigation.push("ProductDetails", { item: item })}
       />
@@ -270,27 +279,35 @@ const ProductDetails = ({ route, navigation }) => {
     } else {
       return (
         <View>
-          <FlatList
-            style={{ marginBottom: 10 }}
-            data={section.content}
-            renderItem={({ item, index }) => (
-              <View style={{ marginVertical: 10 }}>
-                <View style={{ flexDirection: "row" }}>
-                  <Text style={styles.text_username}>{item.username}</Text>
-                  <Text style={styles.text_date}>{item.date}</Text>
+          {section.content.length > 0 ? (
+            <FlatList
+              style={{ marginBottom: 10 }}
+              data={section.content}
+              renderItem={({ item, index }) => (
+                <View style={{ marginVertical: 10 }}>
+                  <View style={{ flexDirection: "row" }}>
+                    <Text style={styles.text_username}>{item.name}</Text>
+                    <Text style={styles.text_date}>
+                      {moment(item.date_created).format("DD/MM/YYYY")}
+                    </Text>
+                  </View>
+                  <Rating
+                    style={{ marginTop: 3, alignSelf: "flex-start" }}
+                    imageSize={10}
+                    startingValue={item.rate}
+                    readonly={true}
+                  />
+                  <Text style={{ marginTop: 5 }}>{item.note}</Text>
                 </View>
-                <Rating
-                  style={{ marginTop: 3, alignSelf: "flex-start" }}
-                  imageSize={10}
-                  startingValue={5}
-                  readonly={true}
-                />
-                <Text style={{ marginTop: 5 }}>{item.comment}</Text>
-              </View>
-            )}
-            keyExtractor={(item) => item.username}
-            showsVerticalScrollIndicator={false}
-          />
+              )}
+              keyExtractor={(item) => item.evaluate_id}
+              showsVerticalScrollIndicator={false}
+            />
+          ) : (
+            <Text style={{ paddingBottom: 20 }}>
+              Sản phẩm chưa có đánh giá nào
+            </Text>
+          )}
         </View>
       );
     }
@@ -301,6 +318,10 @@ const ProductDetails = ({ route, navigation }) => {
   };
 
   function addProductToCart(gotoCart) {
+    if (token === "1") {
+      dispatch(addUserInfo({ token: null }));
+      return;
+    }
     if (currentInfo.color === "") {
       showMessage({
         message: "Bạn chưa chọn màu!",
@@ -328,40 +349,125 @@ const ProductDetails = ({ route, navigation }) => {
 
     let index = value.indexOf(".");
     let v_id = value.substring(0, index);
-    let size = value.substring(index + 1);
 
-    dispatch(
-      addItem({
-        key: Math.random().toString(36).substr(2, 9),
-        v_id: v_id,
-        id: item.id,
-        name: item.name,
-        src: currentInfo.src,
-        status: item.status,
-        old_price: item.old_price,
-        price: currentInfo.price,
-        variant: item.variant,
-        color: currentInfo.color,
-        size: size,
-        quantity: 1,
+    instance
+      .post("/users/addItemToCart", { variant_id: v_id, quantity: 1 })
+      .then(function (response) {
+        dispatch(addUserInfo(response.data));
       })
-    );
+      .catch(function (error) {
+        Alert.alert("Thông báo", "Có lỗi xảy ra: " + error.message);
+        console.log(error);
+      });
+
     if (gotoCart) {
       navigation.navigate("Cart");
     }
   }
 
+  const changeFavorite = () => {
+    if (token === "1") {
+      dispatch(addUserInfo({ token: null }));
+      return;
+    }
+    instance
+      .get("/users/addFavorite/" + item.product_id)
+      .then(function (response) {})
+      .catch(function (error) {
+        Alert.alert("Thông báo", "Có lỗi xảy ra: " + error.message);
+        console.log(error);
+      });
+    dispatch(changeFav(item.product_id));
+  };
+
+  const Item = ({ item, addOrRemoveFav, favorite, onPress }) => {
+    const fav = favorite.includes(item.product_id);
+    const animationProgress = useRef(new Animated.Value(fav ? 1 : 0)).current;
+
+    const changeFavorite = () => {
+      if (token === "1") {
+        dispatch(addUserInfo({ token: null }));
+        return;
+      }
+      animationProgress.setValue(0.15);
+      if (!fav) {
+        Animated.timing(animationProgress, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        }).start(({ finished }) => {
+          if (finished) {
+            addOrRemoveFav();
+          }
+        });
+      } else {
+        animationProgress.setValue(0);
+        addOrRemoveFav();
+      }
+    };
+
+    return (
+      <TouchableOpacity
+        style={{ marginRight: 5, marginBottom: 15, width: 170 }}
+        onPress={onPress}
+      >
+        <View>
+          <ImageBackground style={styles.image_fav} source={{ uri: item.src }}>
+            <TouchableOpacity onPress={changeFavorite}>
+              <LottieView
+                style={styles.iconFav_sub}
+                source={require("../assets/lotties/heart_animation_4.json")}
+                autoPlay={false}
+                loop={false}
+                progress={animationProgress}
+              />
+            </TouchableOpacity>
+          </ImageBackground>
+
+          <Text style={styles.text_sub_status}>{item.status}</Text>
+          <Text style={styles.text_sub_name} numberOfLines={1}>
+            {item.name}
+          </Text>
+
+          <NumberFormat
+            value={item.old_price}
+            displayType={"text"}
+            thousandSeparator={true}
+            suffix={" đ"}
+            renderText={(value, props) => (
+              <Text style={styles.text_sub_old_price} {...props}>
+                {value}
+              </Text>
+            )}
+          />
+
+          <NumberFormat
+            value={item.price}
+            displayType={"text"}
+            thousandSeparator={true}
+            suffix={" đ"}
+            renderText={(value, props) => (
+              <Text style={styles.text_sub_price} {...props}>
+                {value}
+              </Text>
+            )}
+          />
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <Animated.ScrollView
       ref={scrollViewRef}
       showsVerticalScrollIndicator={false}
-      // onMomentumScrollEnd={(event) => setCurrentY(event.nativeEvent.contentOffset.y)}
       scrollEventThrottle={16}
       automaticallyAdjustContentInsets
       onScroll={Animated.event(
         [{ nativeEvent: { contentOffset: { y: yOffset } } }],
         { useNativeDriver: true }
       )}
+      vertical
     >
       <View style={styles.container}>
         <View>
@@ -375,6 +481,9 @@ const ProductDetails = ({ route, navigation }) => {
             hasParallaxImages={true}
             inactiveSlideScale={1}
             onSnapToItem={(index) => setActiveSlide(index)}
+            enableMomentum={true}
+            decelerationRate={"fast"}
+            disableIntervalMomentum={true}
           />
           <Pagination
             dotsLength={result.length}
@@ -403,18 +512,20 @@ const ProductDetails = ({ route, navigation }) => {
           />
           <TouchableOpacity
             style={{ position: "absolute", right: "4%", bottom: 15 }}
-            onPress={() => dispatch(changeFav(item, item.id))}
+            onPress={() => changeFavorite()}
           >
             <Image
               source={
-                fav_product_list.indexOf(item) > -1 ? heartFull : heartOutline
+                fav_product_list.indexOf(item.product_id) > -1
+                  ? heartFull
+                  : heartOutline
               }
               style={styles.iconFav}
             />
           </TouchableOpacity>
         </View>
         <View style={{ flexDirection: "row", paddingHorizontal: 15 }}>
-          <View>
+          <View style={{ width: "70%" }}>
             <Text style={styles.text_status}>{item.status}</Text>
             <Text style={styles.text_name}>{item.name}</Text>
           </View>
@@ -450,16 +561,40 @@ const ProductDetails = ({ route, navigation }) => {
             />
           </View>
         </View>
-        <View style={{ paddingHorizontal: "4%" }}>
-          <Rating
-            style={{ marginTop: 5, alignSelf: "flex-start" }}
-            imageSize={12}
-            startingValue={4}
-            readonly={true}
-          />
+        <View
+          style={{
+            paddingHorizontal: "4%",
+            flexDirection: "row",
+            alignItems: "center",
+            marginTop: 5,
+          }}
+        >
+          {averageRate ? (
+            <>
+              <Rating
+                imageSize={12}
+                startingValue={averageRate}
+                readonly={true}
+              />
+              <Text style={{ marginLeft: 3, fontSize: 10, color: "gray" }}>
+                {"(" + averageRate.toFixed(1) + "/5)"}
+              </Text>
+            </>
+          ) : (
+            <Text style={{ fontSize: 11, color: "gray" }}>
+              Chưa có đánh giá
+            </Text>
+          )}
         </View>
         <View
-          style={{ flexDirection: "row", marginTop: 10, marginHorizontal: 15 }}
+          style={[
+            {
+              flexDirection: "row",
+              marginTop: 10,
+              marginHorizontal: 15,
+            },
+            Platform.OS !== "android" && { zIndex: 3000 },
+          ]}
         >
           <View style={{ flex: 1, flexDirection: "row" }}>{listColors}</View>
           <View style={{ width: "25%" }}>
@@ -473,21 +608,26 @@ const ProductDetails = ({ route, navigation }) => {
               setItems={setItems}
               placeholder="Size"
               listMode="SCROLLVIEW"
+              zIndex={3000}
+              zIndexInverse={1000}
             />
           </View>
         </View>
-        <TouchableOpacity
-          style={styles.add_to_cart}
-          ref={add_to_cart}
-          onPress={() => {
-            addProductToCart(false);
-          }}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.text_add_to_cart}>THÊM VÀO GIỎ HÀNG</Text>
-        </TouchableOpacity>
+        {!outOfStock && (
+          <TouchableOpacity
+            style={styles.add_to_cart}
+            ref={add_to_cart}
+            onPress={() => {
+              addProductToCart(false);
+            }}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.text_add_to_cart}>THÊM VÀO GIỎ HÀNG</Text>
+          </TouchableOpacity>
+        )}
         <Ripple
           style={styles.button_buy}
+          disabled={outOfStock}
           onPress={() => {
             addProductToCart(true);
           }}
@@ -495,13 +635,11 @@ const ProductDetails = ({ route, navigation }) => {
           rippleOpacity={0.4}
           rippleDuration={600}
         >
-          <Text style={styles.text_buy}>Mua Ngay</Text>
+          <Text style={styles.text_buy}>
+            {outOfStock ? "HẾT HÀNG" : "Mua Ngay"}
+          </Text>
         </Ripple>
         <View
-          // onLayout={(event) => {
-          //     const {x, y, width, height} = event.nativeEvent.layout;
-          //     setDimensions({x: width, y: height})
-          // }}
           style={{
             marginHorizontal: "4%",
             marginVertical: 25,
@@ -516,7 +654,7 @@ const ProductDetails = ({ route, navigation }) => {
             onChange={updateSection}
             underlayColor={"transparent"}
             expandMultiple={true}
-            renderAsFlatList={true}
+            renderAsFlatList={false}
             keyExtractor={(item) => item.title}
           />
         </View>
@@ -524,13 +662,41 @@ const ProductDetails = ({ route, navigation }) => {
           <Text style={[styles.headerText, { fontSize: 16, marginBottom: 15 }]}>
             Có thể bạn muốn mua
           </Text>
-          <FlatList
-            horizontal
-            data={data}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id}
-            showsHorizontalScrollIndicator={false}
-          />
+          {loading ? (
+            <View
+              style={{
+                height: 280,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <ActivityIndicator size="large" color="#000000" />
+            </View>
+          ) : (
+            <>
+              {relatedProduct.length === 0 ? (
+                <View
+                  style={{
+                    height: 180,
+                    justifyContent: "center",
+                    marginBottom: 24,
+                  }}
+                >
+                  <Text style={{ textAlign: "center", color: "gray" }}>
+                    Không tìm thấy sản phẩm nào tương tự
+                  </Text>
+                </View>
+              ) : (
+                <FlatList
+                  horizontal
+                  data={relatedProduct}
+                  renderItem={renderItem}
+                  keyExtractor={(item) => item.product_id}
+                  showsHorizontalScrollIndicator={false}
+                />
+              )}
+            </>
+          )}
         </View>
         <Parabolic
           ref={parabolic}
@@ -539,7 +705,7 @@ const ProductDetails = ({ route, navigation }) => {
             return (
               <View style={{ position: "absolute", zIndex: 10, elevation: 10 }}>
                 <Image
-                  source={currentInfo.src}
+                  source={{ uri: currentInfo.src }}
                   style={{ width: 35, height: 60, opacity: 0.8 }}
                 />
               </View>
@@ -561,27 +727,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#ffffff",
   },
-  customSlide: {},
   customImage: {
     flex: 1,
     resizeMode: "contain",
-  },
-  buttons: {
-    zIndex: 1,
-    height: 15,
-    marginTop: "-5%",
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "row",
-  },
-  icon: {
-    zIndex: 1,
-    height: 15,
-    marginTop: "-5%",
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "row",
-    alignSelf: "flex-end",
   },
   button: {
     width: 15,
@@ -608,9 +756,9 @@ const styles = StyleSheet.create({
   },
   text_status: {
     marginTop: 7,
-    fontFamily: "Open_Sans",
     fontStyle: "normal",
     fontWeight: "bold",
+    fontFamily: "Open_Sans_Bold",
     fontSize: 10,
     lineHeight: 15,
   },
@@ -682,6 +830,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 0.5,
   },
   headerText: {
+    fontFamily: "Open_Sans_Bold",
     fontStyle: "normal",
     fontWeight: "bold",
     fontSize: 14,
@@ -698,7 +847,7 @@ const styles = StyleSheet.create({
   },
   text_sub_status: {
     marginTop: 7,
-    fontFamily: "Open_Sans",
+    fontFamily: "Open_Sans_Bold",
     fontStyle: "normal",
     fontWeight: "bold",
     fontSize: 10,
@@ -742,7 +891,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end",
   },
   text_username: {
-    fontFamily: "Open_Sans",
+    fontFamily: "Open_Sans_Bold",
     fontStyle: "normal",
     fontWeight: "bold",
     fontSize: 14,
@@ -781,52 +930,5 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
   },
 });
-
-const data = DATA_PRODUCT;
-
-const sections = [
-  {
-    title: "Chi tiết sản phẩm",
-    content:
-      "- Áo sơ mi dài tay kiểu dáng Slim Fit ôm gọn gàng cơ thể và tôn dáng người mặc.\n" +
-      "\n" +
-      "- Thiết kế cơ bản với cổ đứng gọn gàng. Kết hợp tà lượn thời trang giúp áo dễ dàng kết hợp với " +
-      "nhiều loại trang phục khác nhau." +
-      "- Kết hợp sợi Polyspun giúp áo giữ phom dáng tốt, hạn chế nhăn co, dễ chăm sóc và bền màu sau " +
-      "thời gian dài sử dụng kết hợp chất liệu cotton hút ẩm, thấm mồ hôi dễ giặt ủi.",
-  },
-  {
-    title: "Đánh giá",
-    content: [
-      {
-        username: "HieuofHell",
-        date: "22/1/2020",
-        comment:
-          "Sản phẩm rất tọet vời. Tôi sẽ ủng hộ shop nhiều hơn" +
-          " nữa trong thời gian tới",
-      },
-      {
-        username: "Na Phan",
-        date: "30/5/2021",
-        comment: "Shop đóng gói cẩn thận, giao hàng nhanh, hàng y hình nha",
-      },
-      {
-        username: "kimminh7797",
-        date: "12/1/2021",
-        comment: "Giao hàng chất lượng shop đóng gói khá kĩ ",
-      },
-      {
-        username: "habeee96",
-        date: "09/4/2021",
-        comment: "Mới nhận, chưa biết dùng thế nào.",
-      },
-      {
-        username: "manhmyh",
-        date: "31/12/2020",
-        comment: "Chất lượng sản phẩm tuyệt vời, đóng gói sản phẩm tốt",
-      },
-    ],
-  },
-];
 
 export default ProductDetails;
