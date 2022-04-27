@@ -4,6 +4,10 @@ import {
   DELETE_ITEM,
   INCREASE_QUANTITY,
   DECREASE_QUANTITY,
+  CHANGE_INFO,
+  UPDATE_DELIVERY,
+  CLEAR_CART,
+  LOGOUT,
 } from "./itemTypes";
 import { showMessage } from "react-native-flash-message";
 
@@ -21,6 +25,7 @@ const initialState = {
   bill_list: [],
   delivery: [],
   notify_list: [],
+  showSplash: true,
 };
 const userReducer = (state = initialState, action) => {
   switch (action.type) {
@@ -57,10 +62,55 @@ const userReducer = (state = initialState, action) => {
         ...state,
         cart: decrease_quantity(state, action),
       };
+    case CHANGE_INFO:
+      return {
+        ...state,
+        cart: change_info(state, action),
+      };
+    case UPDATE_DELIVERY:
+      return {
+        ...state,
+        delivery: action.payload,
+      };
+    case CLEAR_CART:
+      return {
+        ...state,
+        cart: [],
+      };
+    case LOGOUT:
+      return { ...state, token: null };
     default:
       return state;
   }
 };
+
+function change_info(state, action) {
+  let duplicate = false;
+  const x = state.cart.map((item) => {
+    if (item.key !== action.key && item.variant_id === action.variant_id) {
+      duplicate = true;
+      return {
+        ...item,
+        quantity: item.quantity + action.quantity,
+      };
+    }
+    if (item.key !== action.key) {
+      return item;
+    }
+    return {
+      ...item,
+      variant_id: action.variant_id,
+      color: action.color,
+      src: action.src,
+      price: action.price,
+      size: action.size,
+    };
+  });
+  if (duplicate) {
+    return x.filter((item) => item.key !== action.key);
+  }
+  return x;
+}
 
 function addOrRemoveFav(state, id) {
   let productExist = state.favorite.indexOf(id);
