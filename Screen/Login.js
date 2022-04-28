@@ -1,47 +1,59 @@
-import React, { useState } from "react";
-import {StyleSheet, Text, View, TouchableOpacity, TextInput, Alert, ActivityIndicator,} from "react-native";
-import { useFonts } from "expo-font";
+import React, { useState, useEffect } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+} from "react-native";
 import Ripple from "react-native-material-ripple";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { addUserInfo } from "../store/itemAction";
 
-const Login = ({ navigation }) => {
+const Login = ({ navigation, notifyToken }) => {
   const dispatch = useDispatch();
+
   const [phone_number, setPhone] = useState("0968641001");
   const [password, setPassword] = useState("ductest123");
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const instance = axios.create({
     baseURL: "https://hieuhmph12287-lab5.herokuapp.com/",
-    timeout: 1000,
   });
 
-  const [loaded] = useFonts({
-    Open_Sans: require("../assets/fonts/OpenSans-Regular.ttf"),
-    Roboto: require("../assets/fonts/Roboto-Regular.ttf"),
-  });
-
-  if (!loaded) {
-    return null;
-  }
+  useEffect(() => {
+    navigation.addListener("beforeRemove", (e) => {
+      e.preventDefault();
+    });
+  }, []);
 
   const userLogin = () => {
+    setErrorMessage("");
+    let phone_regex = /(0[3|5|7|8|9])+([0-9]{8})\b/;
+    if (!phone_regex.test(phone_number)) {
+      setErrorMessage("Số điện thoại không hợp lệ");
+      return;
+    }
+    let password_regex = /^([a-zA-Z0-9@*#]{8,15})$/;
+    if (!password_regex.test(password)) {
+      setErrorMessage("Mật khẩu không hợp lệ");
+      return;
+    }
     setLoading(true);
     instance
       .post("/users/loginUser", {
         phone_number,
         password,
+        notifyToken,
       })
       .then(function (response) {
-        const token = response.data.token;
-        console.log("Res:", response.data);
         setLoading(false);
         dispatch(addUserInfo(response.data));
-        navigation.navigate("MainStack", {
-          params: { phone_number, token },
-          screen: "Home",
-        });
       })
       .catch(function (error) {
         setLoading(false);
@@ -51,9 +63,12 @@ const Login = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
       <Text style={styles.brand}>fasions.</Text>
-      <Text style={styles.title}>Đăng nhập với email của bạn</Text>
+      <Text style={styles.title}>Đăng nhập với số điện thoại của bạn</Text>
 
       <View style={styles.input_container}>
         <View style={styles.inputSection}>
@@ -80,6 +95,7 @@ const Login = ({ navigation }) => {
           />
         </View>
         <TouchableOpacity
+          style={{ alignSelf: "flex-end" }}
           disabled={loading}
           onPress={() => {
             navigation.navigate("ChangePassword");
@@ -87,6 +103,19 @@ const Login = ({ navigation }) => {
         >
           <Text style={styles.text_change_pass}>Quên mật khẩu</Text>
         </TouchableOpacity>
+        {errorMessage ? (
+          <Text
+            style={{
+              color: "red",
+              fontSize: 12,
+              opacity: 0.7,
+              paddingLeft: 4,
+              marginTop: 8,
+            }}
+          >
+            {errorMessage}
+          </Text>
+        ) : null}
       </View>
 
       <Ripple
@@ -117,7 +146,16 @@ const Login = ({ navigation }) => {
           <Text style={styles.text_register_text}>Đăng ký</Text>
         </TouchableOpacity>
       </View>
+      <TouchableOpacity
+        onPress={() => {
+          dispatch(addUserInfo({ token: "1" }));
+        }}
+      >
+        <Text style={styles.text_bypass}>Bỏ qua đăng nhập</Text>
+      </TouchableOpacity>
+    </KeyboardAvoidingView>
     </View>
+
   );
 };
 
@@ -130,7 +168,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: "4%",
   },
   brand: {
-    fontFamily: "Roboto",
+    fontFamily: "Open_Sans_Bold",
     fontStyle: "normal",
     fontWeight: "bold",
     fontSize: 40,
@@ -138,7 +176,7 @@ const styles = StyleSheet.create({
   },
   title: {
     marginTop: 43,
-    fontFamily: "Roboto",
+    fontFamily: "Open_Sans_Bold",
     fontStyle: "normal",
     fontWeight: "bold",
     fontSize: 16,
@@ -168,7 +206,7 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   text_register_text: {
-    fontFamily: "Roboto",
+    fontFamily: "Open_Sans_Bold",
     fontStyle: "normal",
     fontWeight: "bold",
     textDecorationLine: "underline",
@@ -196,32 +234,12 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 41,
+    marginTop: 36,
   },
-  button_container: {
-    marginTop: 33,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  button_login_google: {
-    flexDirection: "row",
-    borderWidth: 1,
-    borderColor: "#000000",
-    width: "45%",
-    height: 42,
-    marginRight: "10%",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  button_login_facebook: {
-    flexDirection: "row",
-    borderWidth: 1,
-    borderColor: "#000000",
-    width: "45%",
-    height: 42,
-    alignItems: "center",
-    justifyContent: "center",
+  text_bypass: {
+    marginTop: 20,
+    fontWeight: "bold",
+    color: "#b0aeae",
   },
 });
 
